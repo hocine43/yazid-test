@@ -49,7 +49,7 @@
           </div>
         </div> 
 
-        <!-- ✅ Modal vidéos (بشكل احترافي ومحسّن) -->
+        <!-- ✅ Modal vidéos Universitaires -->
         <div id="modal-f{{ f.id }}" class="modal fixed inset-0 hidden z-50">
           <div class="modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
           <div class="relative z-10 max-w-[90%] mx-auto my-10 bg-white rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all border border-green-100">
@@ -68,23 +68,38 @@
                   {% if v.formation_id == f.id %}
                     {% set has_videos = true %}
                     <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-gray-200">
-                        <div class="px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 border-b">
-                          <!-- 🎬 عنوان الفيديو -->
-                          <p class="font-medium text-gray-800 text-sm truncate group-hover:text-green-700 transition">
-                            🎬 {{ v.title|e }}
-                          </p>
-                          <!-- 📝 وصف الفيديو -->
-                          <p class="text-gray-600 text-xs mt-1 italic">
-                            {{ (v.description or "— Pas de description —")|e }}
-                          </p>
-                        </div>
+                      <div class="px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 border-b">
+                        <!-- 🎬 عنوان الفيديو -->
+                        <p class="font-medium text-gray-800 text-sm truncate group-hover:text-green-700 transition">
+                          🎬 {{ v.title|e }}
+                        </p>
+                        <!-- 📝 وصف الفيديو -->
+                        <p class="text-gray-600 text-xs mt-1 italic">
+                          {{ (v.description or "— Pas de description —")|e }}
+                        </p>
+                      </div>
+
+                      <!-- ✅ الفيديو + حماية التسجيل -->
                       <div class="relative bg-black flex justify-center items-center">
-                        <div class="relative bg-black flex justify-center items-center">
-                          <video id="player-{{ v.id }}" controls playsinline preload="metadata"
-                                 class="max-h-[80vh] w-auto object-contain rounded-b-xl hover:scale-[1.02] transition-transform duration-300"
-                                 controlsList="nodownload noplaybackrate"
-                                 disablePictureInPicture muted></video>
+                        <video id="player-{{ v.id }}" 
+                               controls 
+                               playsinline 
+                               preload="metadata"
+                               class="protected-video max-h-[80vh] w-auto object-contain rounded-b-xl hover:scale-[1.02] transition-transform duration-300"
+                               controlsList="nodownload noplaybackrate"
+                               disablePictureInPicture
+                               muted></video>
+
+                        <!-- 🛡️ overlay الحماية -->
+                        <div class="record-blocker hidden absolute inset-0 flex items-center justify-center bg-black bg-opacity-95 text-white text-center px-4">
+                          <div>
+                            <p class="text-lg font-semibold mb-2">🔒 Contenu protégé</p>
+                            <p class="text-sm text-gray-200">
+                              La lecture est temporairement bloquée pour des raisons de sécurité.
+                            </p>
+                          </div>
                         </div>
+                      </div>
 
                       <script>
                         document.addEventListener("DOMContentLoaded", () => {
@@ -149,7 +164,7 @@
           </div>
         </div>
 
-        <!-- ✅ Modal vidéos BAC محسّنة -->
+        <!-- ✅ Modal vidéos BAC -->
         <div id="modal-f{{ f.id }}" class="modal fixed inset-0 hidden z-50">
           <div class="modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
           <div class="relative z-10 max-w-[90%] mx-auto my-10 bg-white rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all border border-blue-100">
@@ -176,12 +191,29 @@
                           {{ (v.description or "— Pas de description —")|e }}
                         </p>
                       </div>
-                    <div class="relative bg-black flex justify-center items-center">
-                      <video id="player-{{ v.id }}" controls playsinline preload="metadata"
-                             class="max-h-[80vh] w-auto object-contain rounded-b-xl hover:scale-[1.02] transition-transform duration-300"
-                             controlsList="nodownload noplaybackrate"
-                             disablePictureInPicture muted></video>
-                    </div>
+
+                      <!-- ✅ الفيديو + حماية التسجيل -->
+                      <div class="relative bg-black flex justify-center items-center">
+                        <video id="player-{{ v.id }}" 
+                               controls 
+                               playsinline 
+                               preload="metadata"
+                               class="protected-video max-h-[80vh] w-auto object-contain rounded-b-xl hover:scale-[1.02] transition-transform duration-300"
+                               controlsList="nodownload noplaybackrate"
+                               disablePictureInPicture
+                               muted></video>
+
+                        <!-- 🛡️ overlay الحماية -->
+                        <div class="record-blocker hidden absolute inset-0 flex items-center justify-center bg-black bg-opacity-95 text-white text-center px-4">
+                          <div>
+                            <p class="text-lg font-semibold mb-2">🔒 Contenu protégé</p>
+                            <p class="text-sm text-gray-200">
+                              La lecture est temporairement bloquée pour des raisons de sécurité.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
                       <script>
                         document.addEventListener("DOMContentLoaded", () => {
                           const video = document.getElementById("player-{{ v.id }}");
@@ -229,7 +261,7 @@
 
     {% elif activated and not (formations_univ or formations_bac) %}
       <p class="text-center text-gray-600 text-lg mt-10">
-        😔 Vous n'avez aucune formation для le moment.
+        😔 Vous n'avez aucune formation pour le moment.
       </p>
     {% endif %}
   {% endif %}
@@ -257,6 +289,58 @@
       }
     });
   });
+</script>
+
+<!-- ✅ Protection supplémentaire ضد التسجيل (تقريبية) -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const videos   = document.querySelectorAll(".protected-video");
+  const blockers = document.querySelectorAll(".record-blocker");
+
+  if (!videos.length) return;
+
+  function showProtection() {
+    blockers.forEach(b => b.classList.remove("hidden"));
+    videos.forEach(v => v.style.filter = "brightness(0)");
+  }
+
+  function hideProtection() {
+    blockers.forEach(b => b.classList.add("hidden"));
+    videos.forEach(v => v.style.filter = "");
+  }
+
+  // 🔁 إخفاء الحماية عندما يرجع الفوكس / التاب ظاهر
+  window.addEventListener("focus", () => {
+    if (!document.hidden) hideProtection();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      // خرج من التاب → نخبي الفيديو
+      showProtection();
+    } else {
+      hideProtection();
+    }
+  });
+
+  // 🕵️‍♂️ كشف تقريبي لفتح DevTools (مش كامل لكن يزيد الحماية)
+  let devtoolsOpen = false;
+  setInterval(() => {
+    const threshold = 160;
+    const diffW = window.outerWidth  - window.innerWidth;
+    const diffH = window.outerHeight - window.innerHeight;
+    const nowOpen = (diffW > threshold || diffH > threshold);
+
+    if (nowOpen && !devtoolsOpen) {
+      devtoolsOpen = true;
+      console.warn("DevTools détecté → blocage vidéo");
+      showProtection();
+    } else if (!nowOpen && devtoolsOpen) {
+      devtoolsOpen = false;
+      hideProtection();
+    }
+  }, 1000);
+});
 </script>
 
 {% endblock %}
