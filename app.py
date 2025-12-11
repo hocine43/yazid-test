@@ -38,7 +38,7 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = True
 
-# CSRF protection
+CSRF protection
 csrf = CSRFProtect(app)
 
 @app.after_request
@@ -2106,4 +2106,5 @@ def ajouter_commentaire():
 # ---------------- Lancer l'application ----------------
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
+
 
