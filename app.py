@@ -59,11 +59,12 @@ def add_security_headers(response):
     # MIME sniffing protection
     response.headers["X-Content-Type-Options"] = "nosniff"
 
-    # HSTS - HTTPS enforcement
+    # HSTS - HTTPS enforcement (خليه في البروود فقط)
     response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
 
-    # Referrer policy
-    response.headers["Referrer-Policy"] = "no-referrer"
+    # Referrer policy ✅ تسمح بالـ Referer داخل نفس الدومين باش CSRF يخدم
+    # تقدر تستعمل "same-origin" برك لو تحب تكون أكثر تشدد
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     # Permissions policy
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
@@ -2105,3 +2106,4 @@ def ajouter_commentaire():
 # ---------------- Lancer l'application ----------------
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
+
