@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Notre Équipe{% endblock %}
+
+{% block content %}
+<!-- ✅ Section Hero -->
+<section class="relative bg-gray-300">
+  <div class="relative h-56 md:h-64 w-full overflow-hidden">
+    <div class="absolute inset-0 bg-gray-700/60"></div>
+    <div class="absolute inset-0 flex flex-col justify-center items-center text-white">
+      <h1 class="text-3xl md:text-4xl font-bold mb-2 italic">Notre Équipe</h1>
+      <nav class="text-sm bg-green-500 px-3 py-1 rounded">
+        <a href="{{ url_for('index') }}" class="hover:underline">Accueil</a>
+        <span class="mx-1">›</span>
+        <span>Notre Équipe</span>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ Section principale -->
+<section class="bg-gray-50 py-16">
+  <div class="max-w-6xl mx-auto text-center mb-10">
+    <h2 class="text-3xl font-bold text-gray-800">Notre Équipe</h2>
+    <p class="text-gray-500 mt-2">Découvrez les personnes derrière le succès de Yazid University</p>
+  </div>
+
+  <!-- ✅ Grille de membres -->
+  <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-6">
+
+    <!-- Membre 1 -->
+    <div class="bg-white shadow-md rounded-lg p-6 transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+      <div class="flex items-center mb-3 text-green-600 text-3xl">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-800">BELRHIME Meriem</h3>
+      <p class="text-gray-600 text-sm mt-2 leading-relaxed">
+        Fondatrice de Yazid University. Spécialisée en biologie et microbiologie, Meriem veille à offrir des cours de qualité
+        et un accompagnement pédagogique exemplaire pour tous les étudiants.
+      </p>
+      <div class="flex space-x-3 mt-4 text-green-500">
+        <a href="#" class="hover:text-green-700"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="hover:text-green-700"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="hover:text-green-700"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+
+    <!-- Membre 2 -->
+    <div class="bg-white shadow-md rounded-lg p-6 transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+      <div class="flex items-center mb-3 text-green-600 text-3xl">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-800">DEHICHI Sihem</h3>
+      <p class="text-gray-600 text-sm mt-2 leading-relaxed">
+        Co-fondatrice de Yazid University, responsable de l’organisation et de la coordination pédagogique.
+        Passionnée par l’enseignement et la biologie cellulaire, Sihem veille à la réussite de chaque étudiant.
+      </p>
+      <div class="flex space-x-3 mt-4 text-green-500">
+        <a href="#" class="hover:text-green-700"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="hover:text-green-700"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="hover:text-green-700"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+
+    <!-- Membre 3 -->
+    <div class="bg-white shadow-md rounded-lg p-6 transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+      <div class="flex items-center mb-3 text-green-600 text-3xl">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-800">BELHADJ Amira</h3>
+      <p class="text-gray-600 text-sm mt-2 leading-relaxed">
+        Membre essentielle de l’équipe. Elle s’engage dans la création de contenu et l’animation des cours en ligne,
+        apportant son expertise en biologie et en formation interactive.
+      </p>
+      <div class="flex space-x-3 mt-4 text-green-500">
+        <a href="#" class="hover:text-green-700"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="hover:text-green-700"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="hover:text-green-700"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+
+    <!-- Membre 4 -->
+    <div class="bg-white shadow-md rounded-lg p-6 transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+      <div class="flex items-center mb-3 text-green-600 text-3xl">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-800">AYACHE Rihab</h3>
+      <p class="text-gray-600 text-sm mt-2 leading-relaxed">
+        Membre dynamique et créative, spécialisée dans le soutien pédagogique et l’expérience utilisateur. 
+        Elle contribue activement à l’amélioration continue de la plateforme et des formations.
+      </p>
+      <div class="flex space-x-3 mt-4 text-green-500">
+        <a href="#" class="hover:text-green-700"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="hover:text-green-700"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="hover:text-green-700"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

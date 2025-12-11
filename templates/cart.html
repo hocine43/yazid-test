@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}DZ University{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-6">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b-2 border-green-400 pb-2">
+    🛒 Mon Panier
+  </h2>
+
+  {% if items and items|length > 0 %}
+  <div class="overflow-x-auto">
+    <table class="w-full border-collapse border border-gray-200">
+      <thead>
+        <tr class="bg-green-100 text-gray-700 text-left">
+          <th class="p-3 border">Formation</th>
+          <th class="p-3 border text-right">Prix (DA)</th>
+          <th class="p-3 border text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr class="hover:bg-gray-50 border-t">
+          <td class="p-3 border">{{ item.title }}</td>
+          <td class="p-3 border text-right">{{ item.price }}</td>
+          <td class="p-3 border text-center">
+            <a href="{{ url_for('remove_from_cart', vid=item.id) }}"
+               class="text-red-500 hover:text-red-600 font-medium text-sm">
+              <i class="fas fa-minus-circle mr-1"></i> Supprimer
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+        <tr class="font-semibold bg-gray-50 border-t">
+          <td class="p-3 text-right">Total :</td>
+          <td class="p-3 text-right text-green-600">{{ total }} DA</td>
+          <td class="p-3"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ✅ Boutons d'action -->
+  <div class="flex flex-wrap justify-between items-center mt-8 gap-3">
+    <div class="flex space-x-2">
+      <a href="{{ url_for('formations') }}"
+         class="text-green-600 hover:text-green-700 font-semibold">
+        <i class="fas fa-arrow-left mr-2"></i> Continuer vos achats
+      </a>
+
+      <a href="{{ url_for('clear_cart') }}"
+         class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md text-sm transition">
+        <i class="fas fa-trash-alt mr-1"></i> Vider le panier
+      </a>
+    </div>
+
+    {% if user %}
+      <a href="{{ url_for('checkout') }}"
+         class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-md">
+        <i class="fas fa-credit-card mr-1"></i> Procéder au paiement
+      </a>
+    {% else %}
+      <a href="{{ url_for('login') }}"
+         class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-md">
+        <i class="fas fa-user mr-1"></i> Se connecter pour payer
+      </a>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <div class="text-center py-10 text-gray-600">
+    <i class="fas fa-shopping-cart text-5xl text-green-400 mb-4"></i>
+    <p class="text-lg">Votre panier est vide.</p>
+    <a href="{{ url_for('formations') }}" class="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md">
+      Parcourir les formations
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

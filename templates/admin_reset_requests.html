@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Demandes de réinitialisation{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Demandes de réinitialisation de mot de passe</h1>
+
+    {% if requests %}
+    <table class="table-auto w-full border-collapse border border-gray-300">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="border border-gray-300 p-2">ID</th>
+                <th class="border border-gray-300 p-2">Utilisateur</th>
+                <th class="border border-gray-300 p-2">Raison</th>
+                <th class="border border-gray-300 p-2">Statut</th>
+                <th class="border border-gray-300 p-2">Créé le</th>
+                <th class="border border-gray-300 p-2">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr class="text-center">
+                <td class="border border-gray-300 p-2">{{ req.id }}</td>
+                <td class="border border-gray-300 p-2">{{ req.username }}</td>
+                <td class="border border-gray-300 p-2">{{ req.reason }}</td>
+                <td class="border border-gray-300 p-2">{{ req.status }}</td>
+                <td class="border border-gray-300 p-2">{{ req.created_at }}</td>
+                <td class="border border-gray-300 p-2">
+                    {% if req.status == 'pending' %}
+                    <form action="{{ url_for('admin_generate_temp_password', req_id=req.id) }}" method="post">
+                        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Générer mot de passe</button>
+                    </form>
+                    {% else %}
+                    <span class="text-green-600 font-bold">Terminé</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Aucune demande pour le moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

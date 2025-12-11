@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}DZ University{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-6">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b-2 border-green-400 pb-2">
+    📦 Mes Commandes
+  </h2>
+
+  {% if commandes and commandes|length > 0 %}
+  <div class="overflow-x-auto">
+    <table class="w-full border-collapse border border-gray-200 text-sm">
+      <thead class="bg-green-100 text-gray-700">
+        <tr>
+          <th class="p-3 border">Référence</th>
+          <th class="p-3 border">Date</th>
+          <th class="p-3 border">Montant Total</th>
+          <th class="p-3 border">Paiement</th>
+          <th class="p-3 border">Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cmd in commandes %}
+        <tr class="hover:bg-gray-50">
+          <td class="p-3 border font-medium text-gray-700">#{{ "%05d"|format(cmd.id) }}</td>
+          <td class="p-3 border">{{ cmd.created_at[:10] }}</td>
+          <td class="p-3 border text-green-600 font-semibold">{{ cmd.total }} DA</td>
+          <td class="p-3 border">{{ cmd.payment_mode or '-' }}</td>
+          <td class="p-3 border">
+            {% if cmd.status == 'en attente' %}
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-md">En attente</span>
+            {% elif cmd.status == 'validé' %}
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md">Validé</span>
+            {% elif cmd.status == 'refusé' %}
+              <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-md">Refusé</span>
+            {% else %}
+              <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">Inconnu</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-10 text-gray-600">
+    <i class="fas fa-box-open text-5xl text-green-400 mb-4"></i>
+    <p class="text-lg">Vous n'avez encore passé aucune commande.</p>
+    <a href="{{ url_for('formations') }}" class="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md">
+      Explorer les formations
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

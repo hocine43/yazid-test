@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{% block title %}DZ University{% endblock %}</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- ✅ Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css"
+  />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen antialiased">
+
+  <!-- ✅ Header principal -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="border-b">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-col md:flex-row items-center justify-between gap-4">
+
+        <!-- Logo -->
+        <a href="{{ url_for('index') }}" class="flex items-center text-xl sm:text-2xl font-bold text-green-600">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mr-2">
+          <span class="text-gray-800">DZ University</span>
+        </a>
+
+        <!-- ✅ Barre de recherche globale -->
+        <form action="{{ url_for('search') }}" method="get"
+              class="hidden sm:block w-full md:w-1/2 relative mt-2 md:mt-0" role="search">
+          <input 
+            type="text" 
+            name="q" 
+            placeholder="Rechercher une formation (Universitaire ou BAC)" 
+            class="w-full bg-gray-100 rounded-lg py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm"
+            value="{{ request.args.get('q', '')|e }}"
+          >
+          <button type="submit" class="absolute right-3 top-2.5 text-gray-500 hover:text-green-600">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+
+        <!-- Icône panier + menu utilisateur -->
+        <div class="flex items-center space-x-4 relative">
+          <div class="relative">
+            <a href="{{ url_for('cart') }}" class="relative hover:text-green-600 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.293 2.293a1 1 0 00.707 1.707h12.172a1 1 0 00.707-1.707L17 13M7 13L5.4 5M16 17a2 2 0 11-4 0" />
+              </svg>
+              <span id="cart-count" class="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {{ session.get('cart')|length if session.get('cart') else 0 }}
+              </span>
+            </a>
+          </div>
+
+          {% if session.get('user_id') %}
+          <div class="relative group">
+            <button class="flex items-center space-x-2 focus:outline-none">
+              <div class="text-green-600 text-2xl">
+                <i class="fas fa-user-graduate"></i>
+              </div>
+              <div class="flex flex-col items-start leading-tight text-sm">
+                <span class="font-semibold text-gray-800">{{ user.username|e }}</span>
+                <span class="text-gray-500 text-xs">{{ user.email|e }}</span>
+              </div>
+            </button>
+
+            <div class="absolute right-0 mt-3 w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50">
+              <div class="px-4 py-3 border-b text-sm">
+                <p class="font-semibold text-gray-800">{{ user.username|e }}</p>
+                <p class="text-gray-500">{{ user.email|e }}</p>
+              </div>
+              <ul class="divide-y text-sm">
+                <li>
+                  <a href="{{ url_for('profile') }}" class="flex items-center px-4 py-2 hover:bg-green-50 transition">
+                    <i class="fas fa-user text-green-500 mr-2"></i> Profil
+                  </a>
+                </li>
+                <li>
+                  <a href="{{ url_for('orders') }}" class="flex items-center px-4 py-2 hover:bg-green-50 transition">
+                    <i class="fas fa-shopping-cart text-green-500 mr-2"></i> Mes commandes
+                  </a>
+                </li>
+                <li>
+                  <a href="{{ url_for('my_formations') }}" class="flex items-center px-4 py-2 hover:bg-green-50 transition">
+                    <i class="fas fa-book text-green-500 mr-2"></i> Mes formations
+                  </a>
+                </li>
+              </ul>
+              <div class="p-3">
+                <a href="{{ url_for('logout') }}"
+                   class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-1.5 rounded-md transition">
+                  Déconnexion
+                </a>
+              </div>
+            </div>
+          </div>
+          {% else %}
+            <a href="{{ url_for('login') }}"
+               class="border border-green-500 text-green-500 px-4 py-1 rounded-md hover:bg-green-500 hover:text-white transition">
+              Se Connecter
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Menu de navigation -->
+    <nav class="bg-white text-gray-800 font-medium text-sm md:text-base">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:space-x-6 py-3 text-center">
+        <a href="{{ url_for('index') }}"
+           class="{% if request.path == '/' %}nav-link-active{% else %}hover:text-green-600{% endif %}">
+          Accueil
+        </a>
+
+        <div class="relative group">
+          <a href="{{ url_for('formations') }}"
+             class="{% if request.endpoint == 'formations' %}nav-link-active{% else %}hover:text-green-600{% endif %} flex items-center space-x-1">
+            <span>Nos Formations</span>
+            <i class="fas fa-chevron-down text-sm mt-1"></i>
+          </a>
+
+          <div class="dropdown-menu absolute bg-white border border-gray-200 rounded-lg shadow-lg mt-2 w-48 z-50">
+            <a href="{{ url_for('formations') }}" class="block px-4 py-2 text-gray-700 hover:bg-green-100">Universitaires</a>
+            <a href="{{ url_for('formations_bac') }}" class="block px-4 py-2 text-gray-700 hover:bg-green-100">BAC</a>
+          </div>
+        </div>
+
+        <a href="{{ url_for('my_formations') }}"
+           class="{% if request.endpoint == 'my_formations' %}nav-link-active{% else %}hover:text-green-600{% endif %}">
+          Mes Formations
+        </a>
+        <a href="{{ url_for('commentaires') }}"
+           class="{% if request.endpoint == 'commentaires' %}nav-link-active{% else %}hover:text-green-600{% endif %}">
+          Commentaires
+        </a>
+        <a href="{{ url_for('contact') }}"
+           class="{% if request.endpoint == 'contact' %}nav-link-active{% else %}hover:text-green-600{% endif %}">
+          Contact
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ✅ Contenu des pages -->
+  <main class="flex-grow">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ✅ Footer -->
+  <footer class="bg-white border-t mt-16 py-10">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+      <div>
+        <div class="flex items-center mb-3">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo DZ University" class="w-14 h-14 mr-2">
+          <h3 class="text-xl font-bold text-green-700">DZ University</h3>
+        </div>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Plus de temps à perdre ! Commence dès maintenant les révisions pour les examens.
+        </p>
+        <div class="flex space-x-4 mt-4">
+          <a href="#" class="text-green-500 hover:text-green-600 transition transform hover:scale-110">
+            <i class="fab fa-facebook-f text-lg"></i>
+          </a>
+          <a href="#" class="text-green-500 hover:text-green-600 transition transform hover:scale-110">
+            <i class="fab fa-youtube text-lg"></i>
+          </a>
+          <a href="#" class="text-green-500 hover:text-green-600 transition transform hover:scale-110">
+            <i class="fab fa-instagram text-lg"></i>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-gray-800 font-semibold mb-3">Menu</h4>
+        <ul class="space-y-1 text-sm text-gray-600">
+          <li>
+            <a href="{{ url_for('index') }}" class="hover:text-green-600">
+              <i class="fas fa-angle-right text-green-500 mr-2"></i>Accueil
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('contact') }}" class="hover:text-green-600">
+              <i class="fas fa-angle-right text-green-500 mr-2"></i>Contact
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-gray-800 font-semibold mb-3">Nos formations</h4>
+        <ul class="space-y-1 text-sm text-gray-600">
+          <li>
+            <a href="{{ url_for('formations') }}" class="hover:text-green-600">
+              <i class="fas fa-angle-right text-green-500 mr-2"></i>Universitaire
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('formations_bac') }}" class="hover:text-green-600">
+              <i class="fas fa-angle-right text-green-500 mr-2"></i>BAC
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-gray-800 font-semibold mb-3">Prenez contact avec nous</h4>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li><i class="fas fa-map-marker-alt text-green-500 mr-2"></i>Alger</li>
+          <li><i class="fas fa-phone-alt text-green-500 mr-2"></i>0799125417</li>
+          <li><i class="fas fa-envelope text-green-500 mr-2"></i>yaziduniversity@gmail.com</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="text-center text-xs text-gray-500 mt-10">
+      © {{ current_year if current_year is defined else "2025" }} DZ University — Tous droits réservés.
+    </div>
+  </footer>
+
+  <!-- ✅ نظام التنبيهات Toast العالمي -->
+    <div id="global-toast-container"
+         class="fixed inset-0 z-[9999] flex items-start justify-center pointer-events-none">
+      <div id="global-toast-stack"
+           class="mt-20 w-full max-w-xl px-4 flex flex-col items-center space-y-3">
+      </div>
+    </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+function showToast(message, type = "info") {
+  const stack = document.getElementById("global-toast-stack");
+  const toast = document.createElement("div");
+
+  const styles = {
+    success: "from-emerald-500 to-green-600 border-emerald-400",
+    error:   "from-red-500 to-rose-600 border-red-400",
+    warning: "from-amber-400 to-yellow-500 border-amber-300",
+    info:    "from-sky-500 to-blue-600 border-sky-400",
+  };
+
+  const icons = {
+    success: "fa-circle-check",
+    error:   "fa-circle-xmark",
+    warning: "fa-triangle-exclamation",
+    info:    "fa-circle-info",
+  };
+
+  toast.className = `
+    pointer-events-auto
+    w-full
+    bg-gradient-to-r ${styles[type] || styles.info}
+    text-white
+    px-4 py-3
+    rounded-2xl
+    shadow-2xl
+    border
+    backdrop-blur
+    flex items-center
+    gap-3
+    animate-elegant-toast
+    transition-all
+    duration-300
+    cursor-pointer
+  `;
+
+  toast.innerHTML = `
+    <div class="shrink-0">
+      <div class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
+        <i class="fa-solid ${icons[type] || icons.info} text-lg"></i>
+      </div>
+    </div>
+    <div class="flex-1">
+      <p class="text-sm font-semibold leading-snug">
+        ${message}
+      </p>
+    </div>
+    <button class="shrink-0 text-white/70 hover:text-white text-xs uppercase tracking-wide">
+      Fermer
+    </button>
+  `;
+
+  // ➕ إضافة التوست في الـ stack الوسطي
+  stack.appendChild(toast);
+
+  // 🔁 إغلاق تلقائي بعد 4 ثواني
+  const timer = setTimeout(() => hideToast(toast), 4000);
+
+  // ✋ إغلاق بالضغط
+  toast.addEventListener("click", () => {
+    clearTimeout(timer);
+    hideToast(toast);
+  });
+}
+
+function hideToast(toast) {
+  toast.classList.add("opacity-0", "-translate-y-2", "scale-95");
+  setTimeout(() => toast.remove(), 200);
+}
+
+  // ✅ عرض flash messages من Flask تلقائياً
+  document.addEventListener("DOMContentLoaded", () => {
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        const flashMessages = {{ messages|tojson }};
+        flashMessages.forEach(([category, message]) => {
+          const type = ["success","error","warning","info"].includes(category)
+            ? category
+            : (category === "danger" ? "error" : "info");
+          showToast(message, type);
+        });
+      {% endif %}
+    {% endwith %}
+  });
+
+  // ✅ Animation CSS
+  const style = document.createElement('style');
+style.innerHTML = `
+@keyframes elegant-toast {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-elegant-toast {
+  animation: elegant-toast 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+`;
+  document.head.appendChild(style);
+  </script>
+
+</body>
+</html>

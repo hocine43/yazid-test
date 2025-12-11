@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Vérification du code{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white shadow-lg rounded-lg p-8 mt-10">
+  <h2 class="text-2xl font-bold mb-4 text-gray-800">🔐 Vérification du code</h2>
+  <form method="post">
+    <label class="block mb-2 font-semibold text-gray-700">Entrez le code reçu par email :</label>
+    <input type="text" name="code" maxlength="6" required
+           class="w-full p-2 border border-gray-300 rounded mb-4 focus:ring-2 focus:ring-green-400 focus:outline-none">
+    <button type="submit"
+            class="w-full bg-green-500 text-white font-semibold py-2 rounded hover:bg-green-600 transition">
+      Vérifier le code
+    </button>
+  </form>
+</div>
+{% endblock %}

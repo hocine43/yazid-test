@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}DZ University{% endblock %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto mt-16 p-10 bg-white rounded-lg shadow-md border">
+  <h2 class="text-2xl font-bold text-gray-800 mb-2">Inscription</h2>
+  <p class="text-gray-600 mb-8">
+    Si vous n'avez pas de compte chez nous, veuillez vous inscrire.
+  </p>
+
+  <form id="registerForm" method="post" class="space-y-6" onsubmit="return checkFakeCaptcha()">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- Nom / Prénom -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block mb-1 font-semibold text-gray-700">Nom *</label>
+        <input name="last_name" type="text" placeholder="Nom"
+               class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-400 focus:outline-none" required>
+      </div>
+      <div>
+        <label class="block mb-1 font-semibold text-gray-700">Prénom *</label>
+        <input name="first_name" type="text" placeholder="Prénom"
+               class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-400 focus:outline-none" required>
+      </div>
+    </div>
+
+    <!-- Téléphone / Email -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block mb-1 font-semibold text-gray-700">Téléphone</label>
+        <input name="phone" type="text" placeholder="Numéro de téléphone"
+               class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-400 focus:outline-none">
+      </div>
+      <div>
+        <label class="block mb-1 font-semibold text-gray-700">Adresse e-mail *</label>
+        <input name="email" type="email" placeholder="E-mail"
+               class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-400 focus:outline-none" required>
+      </div>
+    </div>
+
+    <!-- Username -->
+    <div>
+      <label class="block mb-1 font-semibold text-gray-700">Nom d'utilisateur *</label>
+      <input name="username" type="text" placeholder="Nom d'utilisateur"
+             class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-400 focus:outline-none" required>
+    </div>
+
+    <!-- Mot de passe / Confirmation -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block mb-1 font-semibold text-gray-700">Mot de passe *</label>
+        <input name="password" type="password" placeholder="Mot de passe"
+               class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-400 focus:outline-none" required>
+      </div>
+      <div>
+        <label class="block mb-1 font-semibold text-gray-700">Confirmation du mot de passe *</label>
+        <input name="confirm_password" type="password" placeholder="Confirmation mot de passe"
+               class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-400 focus:outline-none" required>
+      </div>
+    </div>
+
+    <!-- ✅ reCAPTCHA Fake -->
+    <div class="mt-4">
+      <div id="fakeCaptcha"
+           class="flex items-center space-x-3 border border-gray-300 rounded-md bg-gray-50 p-3 cursor-pointer select-none"
+           onclick="toggleFakeCaptcha()">
+        <div id="fakeCheckbox"
+             class="w-5 h-5 border-2 border-gray-400 rounded-sm flex items-center justify-center bg-white text-xs font-bold">
+        </div>
+        <span class="text-gray-700 text-sm font-medium">I'm not a robot</span>
+        <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png"
+             alt="reCAPTCHA" class="h-5 ml-auto opacity-70">
+      </div>
+    </div>
+
+    <!-- ✅ Politique de confidentialité -->
+    <p class="text-xs text-gray-600">
+      Vos données personnelles seront utilisées pour soutenir votre expérience sur ce site Web,
+      pour gérer l'accès à votre compte et à d'autres fins décrites dans notre
+      <button type="button" onclick="openModal()" class="text-green-600 font-semibold underline">
+        politique de confidentialité
+      </button>.
+    </p>
+
+    <button type="submit"
+            class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-md transition">
+      S'inscrire
+    </button>
+  </form>
+</div>
+
+<!-- ✅ Modal Conditions d’utilisation -->
+<div id="policyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+  <div class="bg-white max-w-3xl w-full mx-4 rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
+    <div class="flex justify-between items-center border-b p-4">
+      <h2 class="text-lg font-bold text-gray-800">Conditions d’utilisation – شروط الاستخدام</h2>
+      <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+    </div>
+    <div class="p-6 text-gray-700 leading-relaxed text-sm space-y-3 overflow-y-auto">
+
+      <p>
+يسّرنا أن نرحب بك بحرارة في دورات موقع سيانتيا ايدوكاسيون، نود أن نعبر عن تقديرنا العميق لاختيارك لنا، ونتمنى لك تجربة تعليمية ناجحة ومثمرة.
+يرجى الالتزام بالنقاط التالية قبل البدء في متابعة المحتوى التعليمي:
+<br><br>
+الالتزام بالسلوك الحسن والاحترام : من الضروري الالتزام بالاحترام المتبادل والتصرف اللائق مع الطاقم. أي خرق لهذه القواعد سيؤدي إلى الحظر الفوري والطرد النهائي من الموقع، دون استرجاع للأموال.<br>
+الاعتماد على المصادر الأكاديمية : نوصي بشدة الاعتماد على أستاذكم الجامعي ومصادره كمرجع رئيسي أثناء مراجعة المقرر.<br>
+عنّا : نحن فريق من الأساتذة نعمل على تبسيط الدروس باللهجة العامية لتسهيل فهمها للطالب، مع الحفاظ على مضمونها الأكاديمي. لكننا لا نعد بديلاً لأستاذكم الجامعي.<br>
+تنصل من المسؤولية : لا يتحمل فريق سيانتيا إيدوكاسيون أي مسؤولية عن عدم حضوركم للدروس الجامعية أو عدم الاطلاع على أي تعديلات قد يجريها أستاذكم في المحاضرات.<br>
+شراء الدورة واستخدامها : يرجى العلم أن شراء الدورة لا يضمن استرداد الأموال في حال عدم استخدامها قبل انتهاء الدورة أو الامتحانات.<br>
+مدة الدورة : تستمر الدورة لعام دراسي واحد أي حتى اجتياز الامتحانات الاستدراكية. بعد هذا التاريخ، سيتم إلغاء اشتراكك تلقائيًا.<br>
+محتوى الدورة : الاشتراك يشمل فقط الفيديوهات المسجلة، وليس هناك التزام بوجود أستاذ للإجابة على كل أسئلتك.<br>
+طلب مساعدة الأستاذ : يحظر إرسال التمارين أو الامتحانات للأستاذ بشكل خاص.<br>
+حقوق النشر : يمنع مشاركة روابط الدورة أو تحميلها. هذه الدورات مخصصة فقط للمسجلين.<br>
+قبول الشروط : بضغطك على الزر أسفله، تعتبر موافقًا تلقائيًا على جميع الشروط المذكورة.<br>
+<br>
+"هذا ما عندنا، فإن أحسنا فمن الله، وإن أسأنا فمن أنفسنا ومن الشيطان. نطلب العفو ونتمنى لكم التوفيق والنجاح."
+<br><br>
+<strong>Au nom de Dieu, le Clément, le Miséricordieux,</strong><br>
+Nous sommes ravis de vous accueillir chaleureusement sur les formations du site Scientia Éducation.<br>
+Veuillez respecter les points suivants avant de commencer votre parcours éducatif :
+<br><br>
+Respect et courtoisie : tout manquement entraînera une exclusion immédiate et définitive du site, sans remboursement.<br>
+Sources académiques : référez-vous à vos enseignants universitaires et à leurs supports.<br>
+Décharge de responsabilité : Scientia Éducation ne peut être tenu responsable si vous ne suivez pas les cours.<br>
+Achat et utilisation des cours : l’achat d’un cours ne garantit pas un remboursement en cas de non-utilisation.<br>
+Durée des cours : accès valable pour une année académique complète.<br>
+Contenu : l’accès comprend uniquement les vidéos enregistrées.<br>
+Violation des droits d’auteur : toute violation entraînera des poursuites judiciaires.<br>
+<br>
+L’équipe de Scientia Éducation.
+      </p>
+
+    </div>
+    <div class="border-t p-4 text-right">
+      <button onclick="closeModal()" 
+              class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-md">
+        Accepter les Conditions d’Utilisation
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ Captcha
+  let captchaChecked = false;
+  function toggleFakeCaptcha() {
+    captchaChecked = !captchaChecked;
+    const box = document.getElementById("fakeCheckbox");
+    if (captchaChecked) {
+      box.innerHTML = "✔";
+      box.classList.add("bg-green-500", "text-white", "border-green-500");
+    } else {
+      box.innerHTML = "";
+      box.classList.remove("bg-green-500", "text-white", "border-green-500");
+    }
+  }
+  function checkFakeCaptcha() {
+    if (!captchaChecked) {
+      alert("⚠️ Veuillez cocher la case 'I'm not a robot' avant de continuer.");
+      return false;
+    }
+    return true;
+  }
+
+  // ✅ Modal
+  function openModal() {
+    document.getElementById('policyModal').classList.remove('hidden');
+    document.getElementById('policyModal').classList.add('flex');
+  }
+  function closeModal() {
+    document.getElementById('policyModal').classList.add('hidden');
+    document.getElementById('policyModal').classList.remove('flex');
+  }
+</script>
+
+{% endblock %}

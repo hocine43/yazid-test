@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Résultats de recherche - DZ University{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6">
+    Résultats pour "<span class="text-green-600">{{ q|e }}</span>"
+  </h2>
+
+  {% if formations %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for f in formations %}
+        <div class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-xl transition">
+          <img src="{{ url_for('static', filename=f.image) }}" alt="{{ f.titre|e }}" class="h-48 w-full object-cover">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ f.titre|e }}</h3>
+            <p class="text-sm text-gray-600 mb-3">
+              {{ ((f.description or '')[:120])|e }}...
+            </p>
+            <p class="text-green-700 font-bold">{{ f.prix }} DA</p>
+            <a href="{{ url_for('formations') }}" class="inline-block mt-3 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded">
+              Voir la formation
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center text-gray-600 py-10">
+      <i class="fas fa-search text-4xl text-gray-400 mb-3"></i>
+      <p>Aucune formation trouvée pour "<strong>{{ q|e }}</strong>"</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

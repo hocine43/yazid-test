@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}DZ University{% endblock %}
+
+{% block content %}
+<main class="max-w-5xl mx-auto px-4 py-12">
+  <h1 class="text-3xl font-bold text-green-600 mb-8 text-center">
+    Commentaires & Avis des Étudiants
+  </h1>
+
+  <!-- ✅ Zone d'ajout de commentaire -->
+  {% if session.get('user_id') %}
+  <div class="bg-white shadow rounded-lg p-6 mb-10">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+      Laissez votre avis
+    </h2>
+    <form method="POST" action="{{ url_for('ajouter_commentaire') }}" class="space-y-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <!-- Évaluation -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Note :</label>
+        <div class="flex space-x-2 text-yellow-400 text-2xl cursor-pointer" id="stars">
+          {% for i in range(1,6) %}
+            <i class="fa-regular fa-star hover:text-yellow-500" data-value="{{ i }}"></i>
+          {% endfor %}
+        </div>
+        <input type="hidden" name="note" id="note" required>
+      </div>
+
+      <!-- Contenu du commentaire -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Commentaire :</label>
+        <textarea name="contenu" required rows="4"
+          class="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-green-400 focus:outline-none"
+          placeholder="Partagez votre expérience..."></textarea>
+      </div>
+
+      <button type="submit"
+        class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-md transition">
+        Publier
+      </button>
+    </form>
+  </div>
+  {% else %}
+  <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-800 mb-10 text-center rounded-md">
+    Vous devez être connecté pour laisser un commentaire.
+    <a href="{{ url_for('login') }}" class="text-green-600 font-semibold underline ml-1">Se connecter</a>
+  </div>
+  {% endif %}
+
+  <!-- ✅ Liste des commentaires -->
+  <div class="space-y-6">
+    {% for commentaire in commentaires %}
+    <div class="bg-white shadow-md border border-gray-100 rounded-lg p-5">
+      <div class="flex justify-between items-center mb-2">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-user-circle text-green-500 text-2xl"></i>
+          <span class="font-semibold text-gray-800">{{ commentaire.username }}</span>
+        </div>
+        <p class="text-sm text-gray-500">
+          {{ commentaire.date_created }}
+        </p>
+      </div>
+
+      <!-- Affichage des étoiles -->
+      <div class="flex text-yellow-400 mb-3">
+        {% for i in range(1,6) %}
+          {% if i <= commentaire.note %}
+            <i class="fa-solid fa-star"></i>
+          {% else %}
+            <i class="fa-regular fa-star"></i>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <p class="text-gray-700 leading-relaxed">{{ commentaire.contenu }}</p>
+    </div>
+    {% else %}
+    <p class="text-center text-gray-500 italic">
+      Aucun commentaire pour le moment. Soyez le premier à en ajouter !
+    </p>
+    {% endfor %}
+  </div>
+</main>
+
+<!-- ✅ Script pour gestion des étoiles -->
+<script>
+  const stars = document.querySelectorAll('#stars i');
+  const noteInput = document.getElementById('note');
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      const value = parseInt(star.getAttribute('data-value'));
+      noteInput.value = value;
+      stars.forEach((s, i) => {
+        s.classList.toggle('fa-solid', i < value);
+        s.classList.toggle('fa-regular', i >= value);
+      });
+    });
+  });
+</script>
+{% endblock %}

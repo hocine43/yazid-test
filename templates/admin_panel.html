@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+
+  <!-- ✅ نفس روابط CSS مثل base.html -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" type="image/png">
+
+  <style>
+    body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+    .section-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+    .section-content.active { display: block; }
+    .toggle-btn i { transition: transform 0.3s; }
+    .toggle-btn.active i { transform: rotate(180deg); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .hidden-row { display: none; }
+    .search-input { border: 1px solid #ccc; border-radius: 6px; padding: 6px 10px; width: 100%; margin-bottom: 10px; }
+    .export-btn { background: #10b981; color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; }
+    .export-btn:hover { background: #059669; }
+
+    /* ✅ Image modal styles */
+    #imageModal { background-color: rgba(0, 0, 0, 0.8); }
+    #imageModal img { max-height: 90vh; max-width: 90vw; border: 4px solid white; border-radius: 10px; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gray-50">
+
+<!-- ================= Déconnexion admin ================= -->
+<header class="bg-gradient-to-r from-green-600 to-emerald-500 text-white shadow-lg">
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+    
+    <!-- 🔰 Logo + Title -->
+    <div class="flex items-center space-x-3">
+      <div class="bg-white/20 p-2 rounded-lg">
+        <i class="fas fa-user-shield text-white text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-wide">Tableau de bord Admin</h1>
+        <p class="text-sm text-white/80">Gestion du site & supervision</p>
+      </div>
+    </div>
+
+    <!-- ⚙️ Actions -->
+    <div class="flex items-center space-x-4">
+      <a href="{{ url_for('admin_panel') }}" 
+         class="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition rounded-lg px-3 py-2 text-sm font-medium">
+        <i class="fas fa-home"></i> <span>Accueil</span>
+      </a>
+
+      <button id="logoutBtn"
+         class="flex items-center gap-2 bg-red-500 hover:bg-red-600 transition text-white rounded-lg px-3 py-2 text-sm font-medium shadow-md">
+        <i class="fas fa-power-off"></i> <span>Déconnexion</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ✅ Modal Confirmation Logout -->
+<div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-2xl p-6 w-80 text-center">
+    <i class="fas fa-triangle-exclamation text-red-500 text-4xl mb-3"></i>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Confirmation</h3>
+    <p class="text-gray-600 mb-6">Souhaitez-vous vraiment vous déconnecter ?</p>
+    <div class="flex justify-center gap-3">
+      <button id="cancelLogout"
+        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium text-gray-700 transition">Annuler</button>
+      <a href="{{ url_for('admin_logout') }}" 
+        class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-medium text-white transition">Oui</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ Gestion du modal de déconnexion
+  const logoutBtn = document.getElementById("logoutBtn");
+  const logoutModal = document.getElementById("logoutModal");
+  const cancelLogout = document.getElementById("cancelLogout");
+
+  logoutBtn.addEventListener("click", () => logoutModal.classList.remove("hidden"));
+  cancelLogout.addEventListener("click", () => logoutModal.classList.add("hidden"));
+
+  // Fermer modal si clic à l’extérieur
+  logoutModal.addEventListener("click", (e) => {
+    if (e.target === logoutModal) logoutModal.classList.add("hidden");
+  });
+</script>
+
+<!-- ================= Contenu ================= -->
+<div class="max-w-6xl mx-auto mt-8 px-4">
+
+  <h2 class="text-2xl font-semibold mb-4 flex items-center justify-between">
+    <span>Admin Panel</span>
+    <a href="{{ url_for('admin_videos') }}" 
+       class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded shadow transition">
+       🎥 Gérer les Vidéos
+    </a>
+  </h2>
+    
+  <!-- ✅ كود الجافاسكربت الخاص بمودال المستخدم -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const userModal = document.getElementById('userModal');
+    const closeUserModal = document.getElementById('closeUserModal');
+    const deleteUserForm = document.getElementById('deleteUserForm');
+    const deactivateUserForm = document.getElementById('deactivateUserForm');
+
+    function hideModal() { userModal.classList.add('hidden'); }
+    function showModal() {
+      userModal.classList.remove('hidden');
+      userModal.style.zIndex = 9999;
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value ?? '';
+    }
+
+    function renderCodes(codesJson) {
+      const ul = document.getElementById('userCodes');
+      ul.innerHTML = '';
+      let codes = [];
+      try { codes = JSON.parse(codesJson || '[]'); } catch(e) { codes = []; }
+      if (!codes.length) {
+        ul.innerHTML = '<li>—</li>';
+        return;
+      }
+      codes.forEach(c => {
+        const li = document.createElement('li');
+        li.textContent = c;
+        ul.appendChild(li);
+      });
+    }
+
+    function renderOrders(uid) {
+      const container = document.getElementById('userOrdersContainer');
+      container.innerHTML = '<p class="text-gray-500 text-center">Chargement...</p>';
+      fetch(`/admin/api/user_orders/${uid}`)
+        .then(r => r.json())
+        .then(data => {
+          container.innerHTML = '';
+          if (!data.orders || data.orders.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center">Aucune commande trouvée.</p>';
+            return;
+          }
+          data.orders.forEach(o => {
+            const card = document.createElement('div');
+            card.className = 'border rounded-lg p-3 bg-white shadow-sm';
+            card.innerHTML = `
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                <div><strong>ID :</strong> ${o.id}</div>
+                <div><strong>Status :</strong> ${o.status}</div>
+                <div class="sm:col-span-2"><strong>Produit :</strong> ${o.produit || '—'}</div>
+                <div><strong>Total :</strong> ${o.total ?? '0'} DA</div>
+                <div><strong>Créé le :</strong> ${o.created_at || ''}</div>
+              </div>
+              <form method="POST" action="/admin/user/${uid}/delete_order/${o.id}"
+                    onsubmit="return confirm('Supprimer cette commande ?');" class="mt-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">
+                  🗑️ Supprimer
+                </button>
+              </form>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(() => {
+          container.innerHTML = '<p class="text-red-500 text-center">Erreur lors du chargement des commandes.</p>';
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.view-user-btn');
+      if (!btn) return;
+      e.preventDefault();
+
+      const uid        = btn.dataset.id || '';
+      const uname      = btn.dataset.username || '';
+      const firstName  = btn.dataset.first_name || '';
+      const lastName   = btn.dataset.last_name || '';
+      const email      = btn.dataset.email || '';
+      const phone      = btn.dataset.phone || '';
+      const birth      = btn.dataset.birth_date || '';
+      const activated  = btn.dataset.activated || '';
+      const expiry     = btn.dataset.expiry || '';
+      const device     = btn.dataset.device_hash || '';
+      const created    = btn.dataset.created_at || '';
+      const codesJson  = btn.dataset.codes || '[]';
+
+      setText('userId', uid);
+      setText('userName', uname);
+      setText('userFirstName', firstName);
+      setText('userLastName', lastName);
+      setText('userEmail', email);
+      setText('userPhone', phone);
+      setText('userBirth', birth);
+      setText('userStatus', activated);
+      setText('userExpiry', expiry);
+      setText('userDevice', device);
+      setText('userCreated', created);
+
+      renderCodes(codesJson);
+      deleteUserForm.action = `/admin/delete_user/${uid}`;
+      deactivateUserForm.action = `/admin/deactivate_user/${uid}`;
+      document.getElementById('resetDeviceForm').action = `/admin/reset_device/${uid}`;
+      renderOrders(uid);
+      showModal();
+    });
+
+    closeUserModal.addEventListener('click', hideModal);
+    userModal.addEventListener('click', (e) => {
+      if (e.target === userModal) hideModal();
+    });
+  });
+  </script>
+ 
+  <!-- ================= Codes (Génération & Liste par Formation) ================= -->
+  <section class="bg-white p-4 rounded shadow mb-6">
+    <button class="toggle-btn w-full text-left font-semibold text-green-700 flex justify-between items-center">
+      <span><i class="fas fa-key text-green-500 mr-2"></i> Codes par Formation</span>
+      <i class="fas fa-chevron-down"></i>
+    </button>
+
+    <div class="section-content mt-4">
+      <!-- ✅ Génération de codes -->
+      <form method="post" action="{{ url_for('admin_gen') }}" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6 bg-gray-50 p-4 rounded-lg border">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <!-- 🔹 Choix de la formation -->
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Formation concernée *</label>
+          <select name="formation_id" required class="w-full border rounded p-2 bg-white">
+            <option value="">— Sélectionner une formation —</option>
+            {% for f in formations %}
+            <option value="{{ f.id }}">{{ f.titre|e }} — {{ f.prix|e }} DA</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- 🔹 Nombre de codes -->
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Nombre de codes à générer *</label>
+          <input type="number" name="count" value="1" min="1" class="w-full border rounded p-2" required>
+        </div>
+
+        <!-- 🔹 Durée -->
+        <div>
+          <label class="text-sm font-semibold text-gray-700">Durée de validité (jours)</label>
+          <input type="number" name="days" value="365" min="1" class="w-full border rounded p-2">
+        </div>
+
+        <!-- 🔹 Bouton de génération -->
+        <div class="md:col-span-3 text-right">
+          <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded shadow font-semibold">
+            ➕ Générer les codes
+          </button>
+        </div>
+      </form>
+
+      <!-- ✅ Liste groupée par formation -->
+      {% for f in formations %}
+        <div class="border-t pt-4 mt-4">
+          <h3 class="font-bold text-green-700 mb-2 flex items-center">
+            <i class="fas fa-book mr-2"></i> {{ f.titre|e }}
+            <span class="text-sm text-gray-500 ml-2">(ID: {{ f.id }})</span>
+          </h3>
+
+          {% set fcodes = codes | selectattr('formation_id', 'equalto', f.id) | list %}
+          {% if fcodes %}
+          <div class="overflow-x-auto mb-3">
+            <table class="w-full text-sm border border-gray-200 rounded-lg">
+              <thead class="bg-green-100 text-green-800">
+                <tr>
+                  <th class="py-2 px-3 text-left">Code</th>
+                  <th class="py-2 px-3 text-left">Durée</th>
+                  <th class="py-2 px-3 text-left">État</th>
+                  <th class="py-2 px-3 text-left">Utilisé par</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in fcodes %}
+                <tr class="border-t">
+                  <td class="py-1 px-3 font-mono text-gray-800">{{ c.code|e }}</td>
+                  <td class="py-1 px-3">{{ c.duration_days }} j</td>
+                  <td class="py-1 px-3">
+                    {% if c.used %}
+                      <span class="text-red-600 font-semibold">Utilisé</span>
+                    {% else %}
+                      <span class="text-green-600 font-semibold">Libre</span>
+                    {% endif %}
+                  </td>
+                  <td class="py-1 px-3">{{ c.used_by or '—' }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+            <p class="text-gray-500 italic">Aucun code généré pour cette formation.</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ================= 👥 Utilisateurs (avec modal détails & actions) ================= -->
+  <section class="bg-white p-4 rounded shadow mb-6">
+    <button class="toggle-btn w-full text-left font-semibold text-green-700 flex justify-between items-center">
+      <span><i class="fas fa-users text-green-500 mr-2"></i> Utilisateurs</span>
+      <i class="fas fa-chevron-down"></i>
+    </button>
+
+    <div class="section-content mt-4">
+      <div class="flex justify-between mb-2">
+        <input type="text" class="search-input w-3/4" placeholder="🔍 Rechercher un utilisateur..." data-target="users-table">
+        <button class="export-btn" onclick="exportTableToExcel('users-table', 'utilisateurs')">📁 Exporter Excel</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table id="users-table" class="w-full text-sm border border-gray-200">
+          <thead class="bg-green-100 text-green-800">
+            <tr>
+              <th class="py-2 px-3 text-left">ID</th>
+              <th class="py-2 px-3 text-left">Nom</th>
+              <th class="py-2 px-3 text-left">Email</th>
+              <th class="py-2 px-3 text-left">Actif</th>
+              <th class="py-2 px-3 text-left">Détails</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+            <tr class="{% if loop.index > 5 %}hidden-row{% endif %}">
+              <td class="py-2 px-3">{{ u.id }}</td>
+              <td class="py-2 px-3">{{ u.username|e }}</td>
+              <td class="py-2 px-3">{{ u.email|e }}</td>
+              <td class="py-2 px-3">
+                {% if u.activated %}
+                  <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Oui</span>
+                {% else %}
+                  <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">Non</span>
+                {% endif %}
+              </td>
+              <td class="py-2 px-3">
+                <button
+                  class="view-user-btn text-blue-600 hover:underline text-sm"
+                  data-id="{{ u.id }}"
+                  data-username="{{ u.username|e }}"
+                  data-first_name="{{ u.first_name|default('')|e }}"
+                  data-last_name="{{ u.last_name|default('')|e }}"
+                  data-email="{{ u.email|default('')|e }}"
+                  data-phone="{{ u.phone|default('')|e }}"
+                  data-birth_date="{{ u.birth_date|default('')|e }}"
+                  data-activated="{{ 'Oui' if u.activated else 'Non' }}"
+                  data-expiry="{{ u.expiry_date|default('')|e }}"
+                  data-device_hash="{{ u.device_hash|default('')|e }}"
+                  data-created_at="{{ u.created_at|default('')|e }}"
+                  data-codes='{{ (codes | selectattr("used_by","equalto", u.id) | map(attribute="code") | list) | tojson }}'
+                >
+                  👁️ Voir détails
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if users|length > 5 %}
+      <div class="text-center mt-3">
+        <button class="toggle-more text-blue-600 hover:underline" data-target="users-table">Voir plus</button>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ================= Modal: Détails utilisateur (UNE seule fois) ================= -->
+  <div id="userModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative">
+      <button id="closeUserModal" class="absolute top-3 right-4 text-gray-500 hover:text-red-600 text-2xl font-bold">&times;</button>
+
+      <h3 class="text-2xl font-bold text-green-700 mb-4 flex items-center">
+        <i class="fas fa-user-circle mr-2"></i> Détails de l'utilisateur
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border mb-6">
+        <p><strong>ID :</strong> <span id="userId"></span></p>
+        <p><strong>Nom d'utilisateur :</strong> <span id="userName"></span></p>
+        <p><strong>Prénom :</strong> <span id="userFirstName"></span></p>
+        <p><strong>Nom :</strong> <span id="userLastName"></span></p>
+        <p><strong>Email :</strong> <span id="userEmail"></span></p>
+        <p><strong>Téléphone :</strong> <span id="userPhone"></span></p>
+        <p><strong>Date de naissance :</strong> <span id="userBirth"></span></p>
+        <p><strong>Actif :</strong> <span id="userStatus" class="font-semibold"></span></p>
+        <p><strong>Date d'expiration :</strong> <span id="userExpiry"></span></p>
+        <p><strong>Appareil :</strong> <span id="userDevice"></span></p>
+        <p class="md:col-span-2"><strong>Créé le :</strong> <span id="userCreated"></span></p>
+      </div>
+
+      <div class="mb-6 bg-gray-50 p-4 rounded-lg border">
+        <h4 class="text-lg font-semibold text-green-700 mb-2"><i class="fas fa-key mr-2"></i> Codes utilisés</h4>
+        <ul id="userCodes" class="list-disc pl-6 text-sm text-gray-700"></ul>
+      </div>
+
+      <div class="mb-6 bg-gray-50 p-4 rounded-lg border">
+        <h4 class="text-lg font-semibold text-green-700 mb-2"><i class="fas fa-box mr-2"></i> Commandes de l'utilisateur</h4>
+        <div id="userOrdersContainer" class="space-y-2 text-sm text-gray-800">
+          <p class="text-gray-500 text-center">Chargement...</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-end">
+        <form id="deleteUserForm" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded shadow text-sm w-full sm:w-auto">
+            ❌ Supprimer l'utilisateur
+          </button>
+        </form>
+
+        <form id="deactivateUserForm" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded shadow text-sm w-full sm:w-auto">
+            🔒 Désactiver le compte
+          </button>
+        </form>
+
+        <form id="resetDeviceForm" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" 
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded shadow text-sm w-full sm:w-auto"
+                  onclick="return confirm('Voulez-vous vraiment réinitialiser le device de cet utilisateur ?');">
+            🔄 Réinitialiser le device
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 📚 Formations ================= -->
+  <section class="bg-white p-4 rounded shadow mb-6">
+    <button class="toggle-btn w-full text-left font-semibold text-green-700 flex justify-between items-center">
+      <span><i class="fas fa-book text-green-500 mr-2"></i> Gérer les Formations</span>
+      <i class="fas fa-chevron-down"></i>
+    </button>
+
+    <div class="section-content mt-4">
+      <!-- 🔍 Recherche et export -->
+      <div class="flex justify-between mb-2">
+        <input type="text" class="search-input w-3/4"
+               placeholder="🔍 Rechercher une formation..."
+               data-target="formations-table">
+        <button class="export-btn"
+                onclick="exportTableToExcel('formations-table', 'formations')">
+          📁 Exporter Excel
+        </button>
+      </div>
+
+      <!-- ✅ Formulaire d'ajout -->
+      <form method="post"
+            action="{{ url_for('admin_add_formation') }}"
+            enctype="multipart/form-data"
+            class="space-y-4 mb-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="font-semibold text-sm">Titre</label>
+            <input type="text" name="titre" required class="w-full p-2 border rounded">
+          </div>
+          <div>
+            <label class="font-semibold text-sm">Prix</label>
+            <input type="text" name="prix" required class="w-full p-2 border rounded">
+          </div>
+        </div>
+
+        <!-- ✅ Nouveau champ : Type de formation -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="font-semibold text-sm">Type de formation</label>
+            <select name="domaine" required class="w-full p-2 border rounded bg-white">
+              <option value="Universitaire">Universitaire</option>
+              <option value="BAC">BAC</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="font-semibold text-sm">Description</label>
+          <textarea name="description" rows="3" class="w-full p-2 border rounded"></textarea>
+        </div>
+
+        <div>
+          <label class="font-semibold text-sm">Image</label>
+          <input type="file" name="image" accept="image/*" required
+                 class="w-full border rounded p-2 bg-gray-50">
+        </div>
+
+        <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          Ajouter
+        </button>
+      </form>
+
+      <!-- ✅ Tableau des formations -->
+      <div class="overflow-x-auto">
+        <table id="formations-table" class="w-full text-sm border border-gray-200">
+          <thead class="bg-green-100 text-green-800">
+            <tr>
+              <th>Image</th>
+              <th>Titre</th>
+              <th>Type</th>
+              <th>Prix</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in formations %}
+            <tr class="{% if loop.index > 5 %}hidden-row{% endif %}">
+              <td><img src="{{ url_for('static', filename=f.image) }}" class="w-12 h-12 rounded" alt="{{ f.titre|e }}"></td>
+              <td>{{ f.titre|e }}</td>
+              <td>{{ (f.domaine or '—')|e }}</td>
+              <td>{{ f.prix|e }}</td>
+              <td>{{ f.created_at }}</td>
+              <td>
+                <form method="post" action="{{ url_for('admin_delete_formation', fid=f.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="text-red-500 hover:underline text-sm">Supprimer</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if formations|length > 5 %}
+      <div class="text-center mt-3">
+        <button class="toggle-more text-blue-600 hover:underline" data-target="formations-table">Voir plus</button>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ================= 📦 Commandes ================= -->
+  <section class="bg-white p-4 rounded shadow mb-6">
+    <button class="toggle-btn w-full text-left font-semibold text-green-700 flex justify-between items-center">
+      <span><i class="fas fa-box text-green-500 mr-2"></i> Commandes reçues</span>
+      <i class="fas fa-chevron-down"></i>
+    </button>
+
+    <div class="section-content mt-4">
+      <div class="flex justify-between mb-2">
+        <input type="text" class="search-input w-3/4" placeholder="🔍 Rechercher une commande..." data-target="orders-table">
+        <button class="export-btn" onclick="exportTableToExcel('orders-table', 'commandes')">📁 Exporter Excel</button>
+      </div>
+
+      {% if orders %}
+      <div class="overflow-x-auto">
+        <table id="orders-table" class="w-full text-sm border border-gray-200">
+          <thead class="bg-green-100 text-green-800">
+            <tr>
+              <th>#</th>
+              <th>Client</th>
+              <th>Email</th>
+              <th>Paiement</th>
+              <th>Total</th>
+              <th>Statut</th>
+              <th>Preuve / Code</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for o in orders %}
+            <tr class="{% if loop.index > 5 %}hidden-row{% endif %}">
+              <td>{{ o.id }}</td>
+              <td>{{ (o.username or '—')|e }}</td>
+              <td>{{ o.email|e }}</td>
+              <td>{{ o.payment_mode|e }}</td>
+              <td class="text-green-600 font-semibold">{{ o.total }}</td>
+              <td>
+                {% if o.status == 'validé' %}
+                  <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Validé</span>
+                {% elif o.status == 'refusé' %}
+                  <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">Refusé</span>
+                {% else %}
+                  <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold">En attente</span>
+                {% endif %}
+              </td>
+
+              <!-- ✅ Preuve affichée كـ "Image" قابلة للضغط -->
+              <td class="text-center">
+                {% if o.proof %}
+                  {% if 'http' in o.proof %}
+                    <a href="{{ o.proof|e }}" target="_blank" 
+                       class="text-blue-600 hover:underline font-semibold">Image</a>
+                  {% else %}
+                    <a href="{{ url_for('static', filename=o.proof) }}" target="_blank" 
+                       class="text-blue-600 hover:underline font-semibold">Image</a>
+                  {% endif %}
+                {% elif o.status == 'validé' %}
+                  <span class="text-green-600 font-semibold">{{ (o.proof or '—')|e }}</span>
+                {% else %}
+                  <span class="text-gray-400">—</span>
+                {% endif %}
+              </td>
+
+              <td class="text-center space-x-2">
+                {% if o.status == 'en attente' %}
+                  <a href="{{ url_for('admin_validate_order', order_id=o.id) }}" 
+                     class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs">Valider</a>
+
+                  <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs refuse-btn" 
+                          data-id="{{ o.id }}">Refuser</button>
+
+                  <form method="post" action="{{ url_for('admin_delete_order', oid=o.id) }}" class="inline-block">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs">Supprimer</button>
+                  </form>
+                {% else %}
+                  <span class="text-gray-400 text-xs">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-gray-500">Aucune commande reçue pour le moment.</p>
+      {% endif %}
+
+      {% if orders|length > 5 %}
+      <div class="text-center mt-3">
+        <button class="toggle-more text-blue-600 hover:underline" data-target="orders-table">Voir plus</button>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ================= 💬 Messages de Contact ================= -->
+  <section class="bg-white p-4 rounded shadow mb-6">
+    <button class="toggle-btn w-full text-left font-semibold text-green-700 flex justify-between items-center">
+      <span><i class="fas fa-envelope text-green-500 mr-2"></i> Messages de Contact</span>
+      <i class="fas fa-chevron-down"></i>
+    </button>
+
+    <div class="section-content mt-4">
+      <div class="flex justify-between mb-2">
+        <input type="text" class="search-input w-3/4" placeholder="🔍 Rechercher un message..." data-target="messages-table">
+        <button class="export-btn" onclick="exportTableToExcel('messages-table', 'messages-contact')">📁 Exporter Excel</button>
+      </div>
+
+      {% if messages %}
+      <div class="overflow-x-auto">
+        <table id="messages-table" class="w-full text-sm border border-gray-200">
+          <thead class="bg-green-100 text-green-800">
+            <tr>
+              <th class="py-2 px-3 text-left">#</th>
+              <th class="py-2 px-3 text-left">Nom</th>
+              <th class="py-2 px-3 text-left">Email</th>
+              <th class="py-2 px-3 text-left">Téléphone</th>
+              <th class="py-2 px-3 text-left">Message</th>
+              <th class="py-2 px-3 text-left">Date</th>
+              <th class="py-2 px-3 text-left">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in messages %}
+            <tr class="border-t {% if loop.index > 5 %}hidden-row{% endif %}">
+              <td class="py-2 px-3">{{ m.id }}</td>
+              <td class="py-2 px-3">{{ m.name|e }}</td>
+              <td class="py-2 px-3">{{ m.email|e }}</td>
+              <td class="py-2 px-3">{{ m.phone|e }}</td>
+              <td class="py-2 px-3 max-w-xs truncate" title="{{ m.message|e }}">{{ m.message|e }}</td>
+              <td class="py-2 px-3">{{ m.created_at }}</td>
+              <td class="py-2 px-3">
+                <form method="post" action="{{ url_for('admin_delete_message', mid=m.id) }}" 
+                      onsubmit="return confirm('Supprimer ce message ?');" class="inline-block">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">
+                    🗑️ Supprimer
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-gray-500 italic mt-3">Aucun message reçu pour le moment.</p>
+      {% endif %}
+
+      {% if messages|length > 5 %}
+      <div class="text-center mt-3">
+        <button class="toggle-more text-blue-600 hover:underline" data-target="messages-table">Voir plus</button>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ================= 💬 Commentaires ================= -->
+  <section class="bg-white p-4 rounded shadow mb-6">
+    <button class="toggle-btn w-full text-left font-semibold text-green-700 flex justify-between items-center">
+      <span><i class="fas fa-comments text-green-500 mr-2"></i> Commentaires des utilisateurs</span>
+      <i class="fas fa-chevron-down"></i>
+    </button>
+
+    <div class="section-content mt-4">
+      <div class="flex justify-between mb-2">
+        <input type="text" class="search-input w-3/4" placeholder="🔍 Rechercher un commentaire..." data-target="commentaires-table">
+        <button class="export-btn" onclick="exportTableToExcel('commentaires-table', 'commentaires')">📁 Exporter Excel</button>
+      </div>
+
+      {% if commentaires %}
+      <div class="overflow-x-auto">
+        <table id="commentaires-table" class="w-full text-sm border border-gray-200">
+          <thead class="bg-green-100 text-green-800">
+            <tr>
+              <th class="py-2 px-3 text-left">#</th>
+              <th class="py-2 px-3 text-left">Utilisateur</th>
+              <th class="py-2 px-3 text-left">Note</th>
+              <th class="py-2 px-3 text-left">Contenu</th>
+              <th class="py-2 px-3 text-left">Date</th>
+              <th class="py-2 px-3 text-left">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in commentaires %}
+            <tr class="border-t {% if loop.index > 5 %}hidden-row{% endif %}">
+              <td class="py-2 px-3">{{ c.id }}</td>
+              <td class="py-2 px-3 font-semibold">{{ c.username|e }}</td>
+              <td class="py-2 px-3 text-yellow-500 font-bold">{{ c.note }} ⭐</td>
+              <td class="py-2 px-3 max-w-xs truncate" title="{{ c.contenu|e }}">{{ c.contenu|e }}</td>
+              <td class="py-2 px-3">{{ c.date.strftime('%Y-%m-%d') if c.date else '' }}</td>
+              <td class="py-2 px-3">
+                <form method="post" action="{{ url_for('admin_delete_commentaire', cid=c.id) }}" 
+                      onsubmit="return confirm('Supprimer ce commentaire ?');" class="inline-block">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">
+                    🗑️ Supprimer
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-gray-500 italic mt-3">Aucun commentaire pour le moment.</p>
+      {% endif %}
+
+      {% if commentaires|length > 5 %}
+      <div class="text-center mt-3">
+        <button class="toggle-more text-blue-600 hover:underline" data-target="commentaires-table">Voir plus</button>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ✅ Modal Refus -->
+  <div id="refuseModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg w-96 max-w-full p-6 relative">
+      <button id="closeRefuseModal" class="absolute top-2 right-3 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+      <h3 class="text-lg font-semibold text-red-600 mb-3"><i class="fas fa-ban mr-2"></i>Refuser la commande</h3>
+      <form method="post" id="refuseForm" action="">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="font-semibold text-sm text-gray-700">Motif du refus :</label>
+        <textarea name="motif" required rows="3" class="w-full border rounded p-2 mt-1 mb-3"></textarea>
+        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm w-full">Confirmer le refus</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ✅ Modal Aperçu Image -->
+  <div id="imageModal" class="hidden fixed inset-0 flex items-center justify-center z-50">
+    <img id="modalImage" src="" alt="Aperçu" class="max-h-[90%] max-w-[90%] rounded-lg shadow-lg border-4 border-white">
+  </div>
+
+  <script>
+    // ✅ Ouvrir/Fermer section
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+        btn.nextElementSibling.classList.toggle('active');
+      });
+    });
+
+    // ✅ Voir plus / moins
+    document.querySelectorAll('.toggle-more').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const table = document.getElementById(btn.dataset.target);
+        const hidden = table.querySelectorAll('.hidden-row');
+        const show = hidden[0].style.display === 'none' || hidden[0].style.display === '';
+        hidden.forEach(r => r.style.display = show ? '' : 'none');
+        btn.textContent = show ? 'Voir moins' : 'Voir plus';
+      });
+    });
+
+    // ✅ Recherche instantanée
+    document.querySelectorAll('.search-input').forEach(input => {
+      input.addEventListener('keyup', () => {
+        const value = input.value.toLowerCase();
+        const table = document.getElementById(input.dataset.target);
+        table.querySelectorAll('tbody tr').forEach(row => {
+          row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+        });
+      });
+    });
+
+    // ✅ Export Excel
+    function exportTableToExcel(tableId, filename) {
+      const table = document.getElementById(tableId);
+      let html = table.outerHTML.replace(/ /g, '%20');
+      const a = document.createElement('a');
+      a.href = 'data:application/vnd.ms-excel,' + html;
+      a.download = filename + '.xls';
+      a.click();
+    }
+
+    // ✅ Modal refus
+    const refuseModal = document.getElementById('refuseModal');
+    const closeRefuseModal = document.getElementById('closeRefuseModal');
+    const refuseForm = document.getElementById('refuseForm');
+
+    document.querySelectorAll('.refuse-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        refuseForm.action = `/admin/refuse_order/${id}`;
+        refuseModal.classList.remove('hidden');
+      });
+    });
+
+    closeRefuseModal.addEventListener('click', () => refuseModal.classList.add('hidden'));
+    refuseModal.addEventListener('click', e => { if (e.target === refuseModal) refuseModal.classList.add('hidden'); });
+
+    // ✅ Aperçu image agrandie
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    document.querySelectorAll('.proof-img').forEach(img => {
+      img.addEventListener('click', () => {
+        modalImage.src = img.dataset.img;
+        imageModal.classList.remove('hidden');
+      });
+    });
+    imageModal.addEventListener('click', () => {
+      imageModal.classList.add('hidden');
+      modalImage.src = '';
+    });
+  </script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+
+    // 🎯 تفعيل AJAX على جميع الفورمات داخل البانل
+    document.querySelectorAll("form").forEach(form => {
+      // نتجنب النماذج التي ترفع ملفات (enctype multipart)
+      if (form.enctype === "multipart/form-data") return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault(); // 🧱 نوقف reload
+
+        const url = form.action;
+        const method = form.method || "POST";
+        const formData = new FormData(form);
+
+        // 🕐 نضيف حالة تحميل بسيطة
+        const btn = form.querySelector("button[type='submit']");
+        if (btn) {
+          btn.disabled = true;
+          btn.dataset.originalText = btn.textContent;
+          btn.textContent = "⏳...";
+        }
+
+        try {
+          const response = await fetch(url, {
+            method,
+            body: formData
+          });
+          await response.text();
+
+          // ✅ رسالة نجاح مؤقتة
+          showToast(response.ok ? "✅ Action effectuée avec succès" : "❌ Erreur lors de l’opération", response.ok);
+          
+          // 🔄 تحديث الجزء المتأثر بدون reload
+          if (response.ok) {
+            // نحذف الصف مباشرة مثلاً إذا الفورم داخل جدول
+            const row = form.closest("tr");
+            if (row) row.remove();
+          }
+
+        } catch (err) {
+          showToast("⚠️ Erreur de connexion au serveur", false);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = btn.dataset.originalText;
+          }
+        }
+      });
+    });
+
+    // ✅ دالة الرسائل المنبثقة الجميلة
+    function showToast(message, success = true) {
+      const toast = document.createElement("div");
+      toast.className = `
+        fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white text-sm
+        transition-opacity duration-300
+        ${success ? "bg-green-600" : "bg-red-600"}
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = 0;
+        setTimeout(() => toast.remove(), 400);
+      }, 2500);
+    }
+  });
+  </script>
+
+</div> <!-- /max-w-6xl -->
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Activation{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto mt-12 p-6 bg-white rounded-md shadow text-center">
+  <h2 class="text-xl font-semibold mb-4">Activation du compte</h2>
+  <form method="post">
+    <input name="code" placeholder="Code d'activation" class="w-full p-2 border rounded mb-3" />
+    <button class="w-full bg-green-500 text-white py-2 rounded">Activer</button>
+  </form>
+</div>
+{% endblock %}

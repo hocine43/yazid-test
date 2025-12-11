@@ -1,0 +1,53 @@
+<!-- templates/videos.html -->
+{% extends "base.html" %}
+{% block title %}الفيديوهات{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+  {% if videos %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for v in videos %}
+        <div class="card cursor-pointer relative overflow-hidden" 
+             onclick="window.location='{{ url_for('play_video', vid=v['id']) }}'">
+          <video class="card-video w-full h-48 object-cover transition-transform duration-300"
+                 src="{{ url_for('static', filename='videos/' ~ v['filename']) }}"
+                 muted loop preload="metadata"
+                 poster="{{ url_for('static', filename='thumbnails/' ~ v['thumbnail']) if v['thumbnail'] else '' }}">
+          </video>
+          <div class="card-content">
+            <h4 class="font-medium">{{ v['title'] }}</h4>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-gray-600 dark:text-gray-400 text-center py-10">
+      لا توجد فيديوهات حتى الآن.
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // منع تشغيل أكثر من فيديو في الوقت نفسه
+  document.addEventListener('play', function(e) {
+    const videos = document.querySelectorAll('.card-video');
+    videos.forEach(function(video) {
+      if (video !== e.target) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    });
+  }, true);
+
+  // تشغيل الفيديو عند المرور بالماوس وإيقافه عند الخروج
+  document.querySelectorAll('.card-video').forEach(video => {
+    video.addEventListener('mouseenter', () => {
+      video.play();
+    });
+    video.addEventListener('mouseleave', () => {
+      video.pause();
+      video.currentTime = 0;
+    });
+  });
+</script>
+{% endblock %}

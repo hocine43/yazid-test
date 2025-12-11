@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+{% block title %}DZ University{% endblock %}
+{% block content %}
+
+<!-- ================= HERO SECTION (Scientia Final Arabic + Latin Fonts) ================= -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+<section class="bg-gray-50 py-20 relative overflow-hidden font-[Poppins,sans-serif]">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-6 space-y-10 md:space-y-0 relative z-10">
+
+    <!-- ✅ النصوص -->
+    <div class="md:w-1/2 text-center md:text-left flex flex-col items-center md:items-start">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-wide mb-2">
+        DZ university
+      </h1>
+
+      <h2 class="text-3xl sm:text-4xl font-bold text-green-600 mb-6" style="font-family: 'Tajawal', sans-serif;">
+        رسالتنا السامية
+      </h2>
+
+      <p class="text-gray-600 mb-8 text-lg font-light italic leading-relaxed" style="font-family: 'Tajawal', sans-serif;">
+        « اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً »
+      </p>
+
+      <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 justify-center md:justify-start">
+        <a href="{{ url_for('formations') }}" 
+           class="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition flex items-center justify-center space-x-2 text-sm font-medium">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Nos Offres</span>
+        </a>
+
+        <a href="{{ url_for('apropos') }}" 
+           class="border border-green-500 text-green-600 px-6 py-2 rounded-md hover:bg-green-500 hover:text-white transition flex items-center justify-center space-x-2 text-sm font-medium">
+          <i class="fas fa-info-circle"></i>
+          <span>En Savoir Plus</span>
+        </a>
+      </div>
+    </div>
+
+<!------------------- ✅ الفيديو ----------------------->
+<div class="md:w-1/2 flex flex-col items-center relative">
+  <div class="relative w-[500px] h-[500px] flex justify-center items-center rounded-lg overflow-hidden">
+    
+    <!-- 🎬 الفيديو -->
+    <video id="heroVideo" autoplay playsinline loop
+           class="w-full h-full object-cover rounded-lg shadow-lg cursor-pointer transition-opacity duration-700">
+      <source src="{{ url_for('static', filename='videos/hero.mp4') }}" type="video/mp4">
+      متصفحك لا يدعم تشغيل الفيديو.
+    </video>
+
+    <!-- 🔘 زر التشغيل والإيقاف (يبقى في الأسفل على اليمين كما في التصميم الأصلي) -->
+    <button id="playPauseBtn"
+            class="absolute bottom-5 right-5 bg-white/70 hover:bg-white text-green-700 p-3 rounded-full shadow-lg transition">
+      <i id="playIcon" class="fas fa-pause"></i>
+    </button>
+  </div>
+
+  <!-- 🔹 التقييمات من قاعدة البيانات -->
+  <div class="absolute bottom-[-40px] left-1/2 transform -translate-x-1/2 w-full max-w-2xl overflow-hidden">
+    <div id="reviewsCarousel" class="flex transition-transform duration-700 ease-in-out" style="transform: translateX(0);">
+      {% if recent_reviews %}
+        {% for review in recent_reviews %}
+          <div class="w-1/2 flex-shrink-0 px-2">
+            <div class="bg-white rounded-lg shadow p-4 text-gray-700 text-sm">
+              
+              <!-- ⭐ التقييم بالنجوم -->
+              <div class="flex mb-2 text-yellow-400">
+                {% for i in range(review.note) %}
+                  <i class="fas fa-star"></i>
+                {% endfor %}
+                {% for i in range(5 - review.note) %}
+                  <i class="far fa-star"></i>
+                {% endfor %}
+              </div>
+
+              <!-- 💬 نص التعليق -->
+              <p class="italic mb-2" style="font-family: 'Tajawal', sans-serif;">
+                "{{ review.contenu }}"
+              </p>
+
+              <!-- 👤 اسم المستخدم -->
+              <p class="font-semibold text-gray-800 text-xs" style="font-family: 'Tajawal', sans-serif;">
+                {{ review.username }}
+              </p>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="w-full text-center text-gray-500 py-6">
+          
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<!------------------- ✅ سكريبت التحكم في الفيديو ----------------------->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const video = document.getElementById("heroVideo");
+  const btn = document.getElementById("playPauseBtn");
+  const icon = document.getElementById("playIcon");
+
+  // ✅ تفعيل الصوت بنسبة 20٪
+  video.volume = 0.03;
+  video.muted = false;
+
+  // ✅ التشغيل التلقائي عند تحميل الصفحة
+  video.play().catch(() => console.log("⚠️ قد يمنع المتصفح التشغيل التلقائي."));
+
+  // ✅ عند الضغط على الفيديو → تشغيل / إيقاف
+  video.addEventListener("click", () => {
+    if (video.paused) {
+      video.play();
+      icon.classList.replace("fa-play", "fa-pause");
+    } else {
+      video.pause();
+      icon.classList.replace("fa-pause", "fa-play");
+    }
+  });
+
+  // ✅ عند الضغط على الزر → تشغيل / إيقاف
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation(); // حتى لا يتعارض مع حدث الضغط على الفيديو
+    if (video.paused) {
+      video.play();
+      icon.classList.replace("fa-play", "fa-pause");
+    } else {
+      video.pause();
+      icon.classList.replace("fa-pause", "fa-play");
+    }
+  });
+
+  // ✅ عند إعادة تحميل الصفحة → تشغيل تلقائي
+  window.addEventListener("load", () => {
+    video.play();
+    icon.classList.replace("fa-play", "fa-pause");
+  });
+});
+</script>
+
+<!---------------- ✅ سكريبت تمرير كل التعاليق اثنين اثنين إلى النهاية -------------->
+
+<script>
+  const reviewsCarousel = document.getElementById("reviewsCarousel");
+  const reviews = Array.from(reviewsCarousel.children);
+  const total = reviews.length;
+  const visible = 2; // 👈 عدد التعاليق المعروضة في كل مرة
+  let reviewIndex = 0;
+
+  // ✅ عرض مرن حسب عدد التعليقات
+  reviews.forEach(el => el.style.width = `${100 / visible}%`);
+  reviewsCarousel.style.display = "flex";
+  reviewsCarousel.style.transition = "transform 0.6s ease-in-out";
+
+  setInterval(() => {
+    reviewIndex++;
+
+    // ✅ نتحقق إن كنا فعلاً تجاوزنا آخر مجموعة
+    const maxIndex = Math.ceil(total / visible) - 1;
+    if (reviewIndex > maxIndex) reviewIndex = 0;
+
+    reviewsCarousel.style.transform = `translateX(-${reviewIndex * 100}%)`;
+  }, 3000);
+</script>
+
+<!-- ================= ABOUT SECTION ================= -->
+<section id="about" class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center justify-center space-x-2">
+      <i class="fas fa-university text-green-500"></i>
+      <span>Qui sommes-nous ?</span>
+    </h2>
+    <p class="text-gray-600 max-w-3xl mx-auto mb-6">
+      Nous sommes une plateforme éducative moderne dédiée à la formation scientifique et universitaire. 
+      Notre mission est de rendre l'apprentissage accessible, interactif et motivant pour tous les étudiants.
+       <a href="{{ url_for('apropos') }}" 
+           class="bg-green-500 text-white px-5 py-2 rounded-md hover:bg-green-600 transition flex items-center justify-center space-x-2">
+          <i class="fas fa-graduation-cap"></i>
+          <span>En Savoir Plus</span>
+    </a>
+  </div>
+</section>
+
+<!-- ================= NOS FORMATIONS SLIDER (STYLE SCIENTIA) ================= -->
+<section class="bg-gray-50 py-16 w-full overflow-hidden">
+  <h2 class="text-center text-3xl font-semibold text-gray-800 mb-10 flex items-center justify-center space-x-2">
+    <i class="fas fa-chalkboard-teacher text-green-500"></i>
+    <span>Nos Formations</span>
+  </h2>
+
+  <!-- ✅ السلايدر الرئيسي -->
+  <div class="relative w-full max-w-7xl mx-auto px-4 md:px-8">
+    <div id="formationCarousel" class="flex transition-transform duration-700 ease-in-out" style="transform: translateX(0);">
+      {% for f in formations %}
+      <!-- 🔹 كل عنصر -->
+      <div class="w-full md:w-1/2 flex-shrink-0 px-4">
+        <div class="flex flex-col md:flex-row bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden transition-all hover:scale-[1.01]">
+          
+          <!-- صورة -->
+          <div class="md:w-1/2 w-full h-64 md:h-auto overflow-hidden">
+            <img src="{{ url_for('static', filename=f.image) }}" alt="{{ f.titre }}" class="w-full h-full object-cover">
+          </div>
+
+          <!-- نص -->
+          <div class="md:w-1/2 w-full p-6 flex flex-col justify-between">
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 mb-2">{{ f.titre }}</h3>
+              <p class="text-gray-500 text-sm mb-3">
+                Réalisé par : <span class="font-medium text-gray-700">{{ f.auteur or "Équipe Scientia" }}</span><br>
+                <span class="text-gray-400">Durée : {{ f.duree or "—" }} H</span>
+              </p>
+              <p class="text-gray-600 text-sm mb-4 leading-relaxed">{{ f.description[:160] }}...</p>
+              <p class="text-green-700 font-bold text-2xl">{{ f.prix }} DA</p>
+            </div>
+
+            <!-- ✅ زر الشراء -->
+            <button
+              data-id="{{ f.id }}"
+              class="add-to-cart flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md hover:shadow-lg transition duration-300 mt-4">
+              <i class="fas fa-shopping-cart mr-2"></i> Ajouter au Panier
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ✅ نافذة النجاح المنبثقة -->
+<div id="cartSuccessModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center animate-fade-in">
+    <div class="text-green-500 text-5xl mb-4">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-800 mb-2">Succès</h3>
+    <p class="text-gray-600 mb-6">Le produit a été ajouté à votre panier.</p>
+    <div class="flex justify-center space-x-3">
+      <a href="{{ url_for('cart') }}"
+         class="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-md text-sm flex items-center gap-2">
+        <i class="fas fa-shopping-bag"></i> Voir Panier
+      </a>
+      <button id="closeModalBtn"
+         class="bg-gray-800 hover:bg-black text-white font-semibold px-4 py-2 rounded-md text-sm flex items-center gap-2">
+        Continuer mes achats <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fade-in 0.3s ease-out; }
+</style>
+
+<!-- ✅ سكريبت إضافة للسلة -->
+<script>
+// ✅ عرض النافذة المنبثقة
+function showCartSuccessModal() {
+  const modal = document.getElementById("cartSuccessModal");
+  modal.classList.remove("hidden");
+  document.getElementById("closeModalBtn").onclick = () => modal.classList.add("hidden");
+  modal.onclick = (e) => { if (e.target === modal) modal.classList.add("hidden"); };
+  // يغلق تلقائيًا بعد 3 ثوانٍ
+  setTimeout(() => modal.classList.add("hidden"), 20000);
+}
+
+// ✅ عملية الإضافة للسلة عبر AJAX
+document.querySelectorAll('.add-to-cart').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const fid = btn.getAttribute('data-id');
+    btn.disabled = true;
+
+    fetch(`/add_to_cart/${fid}`)
+      .then(() => {
+        btn.disabled = false;
+        showCartSuccessModal();
+        // ✅ تحديث عداد السلة في الهيدر
+        const countElem = document.getElementById('cart-count');
+        if (countElem) {
+          let count = parseInt(countElem.textContent || '0');
+          countElem.textContent = count + 1;
+        }
+      })
+      .catch(() => alert("Erreur lors de l'ajout au panier."));
+  });
+});
+</script>
+
+<!-- ✅ سكريبت التحريك التلقائي (الإصدار المصحّح) -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const carousel = document.getElementById('formationCarousel');
+  if (!carousel) return;
+
+  const slides = carousel.children;
+  const total = slides.length;
+  let index = 0;
+  const visible = 2; // بطاقتان في كل مرة
+
+  // تحديد العرض النسبي
+  Array.from(slides).forEach(slide => slide.style.width = `${100 / visible}%`);
+
+  // التحريك التلقائي كل 6 ثوانٍ
+  setInterval(() => {
+    if (total <= visible) return; // لا تتحرك إذا كان عدد العناصر قليل
+    index++;
+    if (index > Math.ceil(total / visible) - 1) index = 0;
+    carousel.style.transform = `translateX(-${index * 100}%)`;
+  }, 6000);
+});
+</script>
+
+<!-- ================= SERVICES ================= -->
+<section class="bg-white py-20">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-bold text-gray-800 mb-12 flex items-center justify-center space-x-2">
+      <i class="fas fa-cogs text-green-600 text-2xl"></i>
+      <span>Nos Services</span>
+    </h2>
+
+    <div class="grid gap-y-14 gap-x-8 sm:grid-cols-2 lg:grid-cols-3 justify-items-center">
+      <!-- Service 1 -->
+      <div class="max-w-xs group">
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5 
+                    transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg">
+          <i class="fas fa-globe text-green-600 text-2xl transition-transform duration-300 group-hover:rotate-6"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Formations en Ligne</h3>
+        <p class="text-gray-600 text-sm leading-relaxed">
+          Des cours en ligne animés par des experts couvrant la génétique, la microbiologie et bien d'autres domaines.
+        </p>
+      </div>
+
+      <!-- Service 2 -->
+      <div class="max-w-xs group">
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5 
+                    transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg">
+          <i class="fas fa-video text-green-600 text-2xl transition-transform duration-300 group-hover:rotate-6"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Vidéos Enregistrées</h3>
+        <p class="text-gray-600 text-sm leading-relaxed">
+          Accédez à des centaines de vidéos conçues pour simplifier les notions complexes et rendre l'apprentissage fluide.
+        </p>
+      </div>
+
+      <!-- Service 3 -->
+      <div class="max-w-xs group">
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5 
+                    transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg">
+          <i class="fas fa-book-open text-green-600 text-2xl transition-transform duration-300 group-hover:rotate-6"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Documents et Ressources</h3>
+        <p class="text-gray-600 text-sm leading-relaxed">
+          Téléchargez des livres, fiches et supports d'études pour enrichir vos connaissances et réussir vos examens.
+        </p>
+      </div>
+
+      <!-- Service 4 -->
+      <div class="max-w-xs group">
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5 
+                    transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg">
+          <i class="fas fa-star text-green-600 text-2xl transition-transform duration-300 group-hover:rotate-6"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Cours Particuliers</h3>
+        <p class="text-gray-600 text-sm leading-relaxed">
+          Des cours personnalisés avec un suivi individuel pour un apprentissage efficace et adapté à votre rythme.
+        </p>
+      </div>
+
+      <!-- Service 5 -->
+      <div class="max-w-xs group">
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5 
+                    transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg">
+          <i class="fas fa-briefcase text-green-600 text-2xl transition-transform duration-300 group-hover:rotate-6"></i>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">Formation Professionnelle</h3>
+        <p class="text-gray-600 text-sm leading-relaxed">
+          Suivez nos programmes certifiants pour renforcer vos compétences et booster votre carrière scientifique.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TEAM ================= -->
+<section id="team" class="bg-gray-50 py-16">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-10 flex items-center justify-center space-x-2">
+      <i class="fas fa-users text-green-500"></i><span>Notre Équipe</span>
+    </h2>
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
+      <div class="bg-white shadow rounded-lg p-6 hover:shadow-xl transition-transform hover:scale-105">
+        <i class="fas fa-user-circle text-6xl text-green-500 mb-3"></i>
+        <h3 class="font-semibold text-gray-800">MERIEM Benali</h3>
+        <p class="text-green-600 text-sm">Enseignante & Responsable pédagogique</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-6 hover:shadow-xl transition-transform hover:scale-105">
+        <i class="fas fa-user-tie text-6xl text-green-500 mb-3"></i>
+        <h3 class="font-semibold text-gray-800">hocine bouretaa</h3>
+        <p class="text-green-600 text-sm">n développeur web est une personne qui conçoit et programme des sites internet pour les rendre interactifs et faciles à utiliser.
+Il utilise des langages comme HTML, CSS et JavaScript pour créer des pages attrayantes répondant aux besoins des utilisateurs et des entreprises.</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-6 hover:shadow-xl transition-transform hover:scale-105">
+        <i class="fas fa-user-cog text-6xl text-green-500 mb-3"></i>
+        <h3 class="font-semibold text-gray-800">SLIMANE A.</h3>
+        <p class="text-green-600 text-sm">Responsable multimédia</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RÉSERVATION ================= -->
+<section class="py-16 bg-green-50 text-center">
+  <div class="max-w-5xl mx-auto bg-gradient-to-r from-green-500 to-green-700 rounded-xl p-10 text-white shadow-lg">
+    <h2 class="text-2xl sm:text-3xl font-semibold mb-4 flex justify-center items-center space-x-2">
+      <i class="fas fa-chalkboard text-white"></i><span>Débute tes cours particuliers et progresse rapidement</span>
+    </h2>
+    <a href="{{ url_for('register') }}" class="bg-white text-green-700 font-semibold px-6 py-2 mt-4 inline-block rounded-md hover:bg-gray-100 transition flex items-center justify-center mx-auto w-fit space-x-2">
+      <i class="fas fa-calendar-check"></i><span>Réserver</span>
+    </a>
+  </div>
+</section>
+
+{% endblock %}

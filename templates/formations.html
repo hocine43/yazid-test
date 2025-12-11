@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}DZ University{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 py-10">
+
+  <!-- 🔹 Titre principal -->
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl sm:text-3xl font-bold text-green-700">
+      Nos Formations <span class="text-green-500">Universitaires</span>
+    </h1>
+
+    <!-- 🔹 Bouton pour afficher/masquer les filtres -->
+    <button id="toggleFiltersBtn"
+      class="flex items-center space-x-2 text-green-600 hover:text-green-700 font-medium transition">
+      <span>Filtres</span>
+      <i id="filterArrow" class="fas fa-chevron-down transition-transform duration-300"></i>
+    </button>
+  </div>
+
+  <!-- 🔹 Bloc filtres -->
+  <div id="filtersSection"
+       class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-10 hidden transition-all duration-500">
+    <form method="get" action="{{ url_for('formations') }}">
+      <!-- Domaines -->
+      <div class="mb-4">
+        <h3 class="font-semibold text-gray-700 mb-2">Domaines</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+          <label><input type="checkbox" name="domaine" value="Biologie"
+            {% if 'Biologie' in selected_domaines %}checked{% endif %}> Biologie</label>
+          <label><input type="checkbox" name="domaine" value="Médecine"
+            {% if 'Médecine' in selected_domaines %}checked{% endif %}> Médecine</label>
+          <label><input type="checkbox" name="domaine" value="École Supérieure"
+            {% if 'École Supérieure' in selected_domaines %}checked{% endif %}> École Supérieure</label>
+          <label><input type="checkbox" name="domaine" value="Agronomie"
+            {% if 'Agronomie' in selected_domaines %}checked{% endif %}> Agronomie</label>
+        </div>
+      </div>
+
+      <!-- Niveaux -->
+      <div class="mb-4">
+        <h3 class="font-semibold text-gray-700 mb-2">Niveaux</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+          <label><input type="checkbox" name="niveau" value="1ère Année Médecine"
+            {% if '1ère Année Médecine' in selected_niveaux %}checked{% endif %}> 1ère Année Médecine</label>
+          <label><input type="checkbox" name="niveau" value="2ème Année Médecine"
+            {% if '2ème Année Médecine' in selected_niveaux %}checked{% endif %}> 2ème Année Médecine</label>
+          <label><input type="checkbox" name="niveau" value="3ème Année Médecine"
+            {% if '3ème Année Médecine' in selected_niveaux %}checked{% endif %}> 3ème Année Médecine</label>
+          <label><input type="checkbox" name="niveau" value="L1 SNV Biologie"
+            {% if 'L1 SNV Biologie' in selected_niveaux %}checked{% endif %}> L1 SNV Biologie</label>
+          <label><input type="checkbox" name="niveau" value="L2 SNV Biologie"
+            {% if 'L2 SNV Biologie' in selected_niveaux %}checked{% endif %}> L2 SNV Biologie</label>
+          <label><input type="checkbox" name="niveau" value="L3 Biologie"
+            {% if 'L3 Biologie' in selected_niveaux %}checked{% endif %}> L3 Biologie</label>
+        </div>
+      </div>
+
+      <!-- Spécialités -->
+      <div>
+        <h3 class="font-semibold text-gray-700 mb-2">Spécialités</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+          <label><input type="checkbox" name="specialite" value="L3 Biochimie"
+            {% if 'L3 Biochimie' in selected_specialites %}checked{% endif %}> L3 Biochimie</label>
+          <label><input type="checkbox" name="specialite" value="L3 Génétique"
+            {% if 'L3 Génétique' in selected_specialites %}checked{% endif %}> L3 Génétique</label>
+          <label><input type="checkbox" name="specialite" value="L3 Microbiologie"
+            {% if 'L3 Microbiologie' in selected_specialites %}checked{% endif %}> L3 Microbiologie</label>
+          <label><input type="checkbox" name="specialite" value="L3 Écologie"
+            {% if 'L3 Écologie' in selected_specialites %}checked{% endif %}> L3 Écologie</label>
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-5 space-x-2">
+        <button type="reset" class="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-100 transition">
+          Annuler Tous les Filtres
+        </button>
+        <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition">
+          Appliquer les Filtres
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 🔹 Liste des formations -->
+  <div class="space-y-6">
+    {% for f in formations %}
+      {% if f.domaine == 'Universitaire' %}
+      <div class="card shadow-md border border-gray-100 p-4 flex flex-col md:flex-row justify-between items-start">
+        <div class="flex items-start gap-4">
+          <img src="{{ url_for('static', filename=f.image) }}" alt="{{ f.titre|e }}" class="w-24 h-32 rounded-md object-cover shadow-sm">
+          <div>
+            <h2 class="text-lg font-semibold text-green-600">{{ f.titre|e }}</h2>
+            {% if f.description %}
+            <p class="text-sm text-gray-600 mb-2">{{ f.description|e }}</p>
+            {% endif %}
+            <p class="text-xs text-gray-500 mt-1">
+              {{ (f.domaine or '')|e }} — {{ (f.niveau or '')|e }} — {{ (f.specialite or '')|e }}
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col items-end mt-4 md:mt-0">
+          <span class="text-green-600 font-semibold text-lg">{{ f.prix }} DA</span>
+          <button
+            data-id="{{ f.id }}"
+            class="add-to-cart mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm transition">
+            <i class="fas fa-cart-plus mr-1"></i> Ajouter au Panier
+          </button>
+        </div>
+      </div>
+      {% endif %}
+    {% else %}
+      <p class="text-center text-gray-500 mt-10">Aucune formation trouvée selon les filtres sélectionnés.</p>
+    {% endfor %}
+  </div>
+
+  <!-- 🔹 Pagination -->
+  <div class="flex justify-center items-center mt-10 space-x-1">
+    {% if page > 1 %}
+      <a href="{{ url_for('formations', page=page-1) }}" class="px-3 py-1 border rounded-md hover:bg-green-100">&laquo;</a>
+    {% endif %}
+    {% for p in range(1, total_pages + 1) %}
+      <a href="{{ url_for('formations', page=p) }}"
+         class="px-3 py-1 border rounded-md {% if p == page %}bg-green-500 text-white{% else %}hover:bg-green-100{% endif %}">
+        {{ p }}
+      </a>
+    {% endfor %}
+    {% if page < total_pages %}
+      <a href="{{ url_for('formations', page=page+1) }}" class="px-3 py-1 border rounded-md hover:bg-green-100">&raquo;</a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ✅ Modal Succès -->
+<div id="cartSuccessModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center animate-fade-in">
+    <div class="text-green-500 text-5xl mb-4">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-800 mb-2">Succès</h3>
+    <p class="text-gray-600 mb-6">Le produit a été ajouté à votre panier.</p>
+    <div class="flex justify-center space-x-3">
+      <a href="{{ url_for('cart') }}"
+         class="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-md text-sm flex items-center gap-2">
+        <i class="fas fa-shopping-bag"></i> Voir Panier
+      </a>
+      <button id="closeModalBtn"
+         class="bg-gray-800 hover:bg-black text-white font-semibold px-4 py-2 rounded-md text-sm flex items-center gap-2">
+        Continuer mes achats <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fade-in 0.3s ease-out; }
+</style>
+
+<!-- ✅ Scripts -->
+<script>
+document.getElementById('toggleFiltersBtn').addEventListener('click', () => {
+  const filters = document.getElementById('filtersSection');
+  const arrow = document.getElementById('filterArrow');
+  filters.classList.toggle('hidden');
+  arrow.classList.toggle('rotate-180');
+});
+
+// ✅ Afficher le modal de succès
+function showCartSuccessModal() {
+  const modal = document.getElementById("cartSuccessModal");
+  modal.classList.remove("hidden");
+  document.getElementById("closeModalBtn").onclick = () => modal.classList.add("hidden");
+  modal.onclick = (e) => { if (e.target === modal) modal.classList.add("hidden"); };
+  setTimeout(() => modal.classList.add("hidden"), 3000);
+}
+
+// ✅ Ajouter au panier (AJAX)
+document.querySelectorAll('.add-to-cart').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const fid = btn.getAttribute('data-id');
+    btn.disabled = true;
+
+    fetch(`/add_to_cart/${fid}`)
+      .then(() => {
+        btn.disabled = false;
+        showCartSuccessModal();
+        const countElem = document.getElementById('cart-count');
+        if (countElem) {
+          let count = parseInt(countElem.textContent || '0');
+          countElem.textContent = count + 1;
+        }
+      })
+      .catch(() => alert('Erreur lors de l’ajout au panier.'));
+  });
+});
+</script>
+{% endblock %}

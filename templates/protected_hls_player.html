@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ video.title }}{% endblock %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto mt-10 bg-white rounded-xl shadow-lg p-6">
+  <h2 class="text-2xl font-bold text-green-700 mb-4">{{ video.title }}</h2>
+
+  <div class="relative">
+    <!-- 🎥 مشغل الفيديو -->
+    <video id="player"
+           class="w-full rounded-lg shadow-md bg-black"
+           controls
+           playsinline
+           autoplay
+           controlsList="nodownload noremoteplayback"
+           disablePictureInPicture>
+      <source src="{{ playlist_url }}" type="application/vnd.apple.mpegurl">
+      {{ gettext("Votre navigateur ne supporte pas la vidéo.") }}
+    </video>
+
+    <!-- 🛑 تذكير بالحماية -->
+    <p class="text-xs text-gray-500 italic mt-2">
+      🔒 Cette vidéo est protégée contre le téléchargement et marquée d’un filigrane dynamique.
+    </p>
+  </div>
+</div>
+
+<!-- ✅ مكتبة HLS.js لتشغيل ملفات .m3u8 في المتصفحات -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const video = document.getElementById("player");
+  const videoSrc = "{{ playlist_url }}";
+
+  // ✅ إذا كان المتصفح لا يدعم HLS بشكل مباشر
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(videoSrc);
+    hls.attachMedia(video);
+  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = videoSrc;
+  }
+
+  // 🎧 الصوت عند 50%
+  video.volume = 0.5;
+
+  // 🚫 تعطيل النقر اليميني + النسخ
+  video.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("keydown", e => {
+    if ((e.ctrlKey && e.key === 's') || (e.ctrlKey && e.key === 'u')) e.preventDefault();
+  });
+
+  // 💧 منع السحب أو سحب الفيديو خارج الصفحة
+  video.addEventListener("dragstart", e => e.preventDefault());
+});
+</script>
+
+{% endblock %}

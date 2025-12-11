@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+
+  <!-- ✅ نفس روابط CSS مثل base.html -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" type="image/png">
+
+  <style>
+    body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+
+<!-- ================= Déconnexion admin ================= -->
+<header class="bg-gradient-to-r from-green-600 to-emerald-500 text-white shadow-lg">
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+    
+    <!-- 🔰 Logo + Title -->
+    <div class="flex items-center space-x-3">
+      <div class="bg-white/20 p-2 rounded-lg">
+        <i class="fas fa-user-shield text-white text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-wide">Tableau de bord Admin</h1>
+        <p class="text-sm text-white/80">Gestion du site & supervision</p>
+      </div>
+    </div>
+
+    <!-- ⚙️ Actions -->
+    <div class="flex items-center space-x-4">
+      <a href="{{ url_for('admin_panel') }}" 
+         class="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition rounded-lg px-3 py-2 text-sm font-medium">
+        <i class="fas fa-home"></i> <span>Accueil</span>
+      </a>
+
+      <button id="logoutBtn"
+         class="flex items-center gap-2 bg-red-500 hover:bg-red-600 transition text-white rounded-lg px-3 py-2 text-sm font-medium shadow-md">
+        <i class="fas fa-power-off"></i> <span>Déconnexion</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ✅ Modal Confirmation Logout -->
+<div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-2xl p-6 w-80 text-center">
+    <i class="fas fa-triangle-exclamation text-red-500 text-4xl mb-3"></i>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Confirmation</h3>
+    <p class="text-gray-600 mb-6">Souhaitez-vous vraiment vous déconnecter ?</p>
+    <div class="flex justify-center gap-3">
+      <button id="cancelLogout"
+        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium text-gray-700 transition">Annuler</button>
+      <a href="{{ url_for('admin_logout') }}" 
+        class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-medium text-white transition">Oui</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ Gestion du modal de déconnexion
+  const logoutBtn = document.getElementById("logoutBtn");
+  const logoutModal = document.getElementById("logoutModal");
+  const cancelLogout = document.getElementById("cancelLogout");
+
+  logoutBtn.addEventListener("click", () => logoutModal.classList.remove("hidden"));
+  cancelLogout.addEventListener("click", () => logoutModal.classList.add("hidden"));
+
+  // Fermer modal si clic à l’extérieur
+  logoutModal.addEventListener("click", (e) => {
+    if (e.target === logoutModal) logoutModal.classList.add("hidden");
+  });
+</script>
+
+<body class="min-h-screen bg-gray-50">
+  <div class="max-w-6xl mx-auto mt-8 px-4">
+<div class="max-w-5xl mx-auto mt-8 px-4">
+  <h2 class="text-2xl font-semibold mb-6 text-green-700 flex items-center space-x-2">
+    <i class="fas fa-video text-green-500"></i>
+    <span>Gérer les vidéos</span>
+  </h2>
+  
+
+  <!-- ✅ Formulaire d'ajout de vidéo -->
+  <form method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow space-y-4 mb-8">
+    <div>
+      <label class="block font-semibold text-sm mb-1">Titre de la vidéo</label>
+      <input type="text" name="title" required class="w-full p-2 border rounded focus:ring-2 focus:ring-green-400">
+    </div>
+
+    <div>
+      <label class="block font-semibold text-sm mb-1">Formation liée</label>
+      <select name="formation_id" required class="w-full p-2 border rounded focus:ring-2 focus:ring-green-400">
+        <option value="">-- Sélectionner une formation --</option>
+        {% for f in formations %}
+          <option value="{{ f.id }}">{{ f.titre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <!-- ✅ Nouveau champ : Description de la vidéo -->
+    <div>
+      <label class="block font-semibold text-sm mb-1">Description de la vidéo</label>
+      <textarea name="description" rows="3" placeholder="Écrivez ici une brève description du contenu de la vidéo..."
+                class="w-full p-2 border rounded focus:ring-2 focus:ring-green-400 bg-white"></textarea>
+    </div>
+
+    <div>
+      <label class="block font-semibold text-sm mb-1">Fichier vidéo</label>
+      <input type="file" name="video_file" accept="video/*" required class="w-full p-2 border rounded bg-gray-50">
+    </div>
+
+    <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">
+      📤 Télécharger la vidéo
+    </button>
+  </form>
+
+  <!-- ✅ Liste des vidéos -->
+  <div class="bg-white p-6 rounded-lg shadow">
+    <h3 class="font-semibold text-gray-800 mb-3 flex items-center space-x-2">
+      <i class="fas fa-list text-green-500"></i>
+      <span>Vidéos enregistrées</span>
+    </h3>
+
+    {% if vids and vids|length > 0 %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border border-gray-200 rounded-lg">
+          <thead class="bg-green-100 text-green-800">
+            <tr>
+              <th class="px-3 py-2 text-left">#</th>
+              <th class="px-3 py-2 text-left">Titre</th>
+              <th class="px-3 py-2 text-left">Formation</th>
+              <th class="px-3 py-2 text-left">Fichier</th>
+              <th class="px-3 py-2 text-left">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in vids %}
+              <tr class="border-t hover:bg-green-50 transition">
+                <td class="px-3 py-2">{{ v.id }}</td>
+                <td class="px-3 py-2 font-semibold text-gray-800">{{ v.title }}</td>
+                <td class="px-3 py-2 text-gray-600">
+                  {{ v.formation_titre or '— Non liée —' }}
+                </td>
+                <td class="px-3 py-2">
+                  <a href="{{ url_for('static', filename='uploads/' + v.filename) }}" target="_blank" class="text-blue-600 hover:underline">
+                    {{ v.filename }}
+                  </a>
+                </td>
+                <td class="px-3 py-2">
+                  <form method="POST" action="{{ url_for('delete_video', vid=v.id) }}" onsubmit="return confirm('Supprimer cette vidéo ?');">
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">Supprimer</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-500">Aucune vidéo ajoutée pour le moment.</p>
+    {% endif %}
+  </div>
+</div>
+ </div> <!-- end main container -->
+</body>
+</html>

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Résultats de recherche{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6">
+    Résultats pour "{{ query }}"
+  </h2>
+
+  {% if results %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for video in results %}
+        <div class="card p-4 text-center shadow-md border border-gray-200">
+          <h3 class="font-semibold text-lg text-green-700 mb-2">{{ video['title'] }}</h3>
+          {% if activated %}
+            <a href="{{ url_for('play_video', vid=video['id']) }}"
+               class="block bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition">
+               Voir le cours
+            </a>
+          {% else %}
+            <div class="text-gray-500 text-sm mb-2">Cours Premium</div>
+            <div class="text-green-600 font-semibold">Prix : 9.99 €</div>
+            {% if user %}
+              <div class="text-xs mt-2 text-red-500">Activez votre compte pour accéder au contenu</div>
+            {% else %}
+              <div class="text-xs mt-2 text-gray-400">Connectez-vous pour plus d'informations</div>
+            {% endif %}
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-gray-500 mt-4">Aucun résultat trouvé pour votre recherche.</p>
+  {% endif %}
+</div>
+{% endblock %}

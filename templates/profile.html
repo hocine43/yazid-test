@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Profil de {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="flex justify-center mt-10">
+  <div class="flex w-10/12 bg-white shadow-md rounded-lg overflow-hidden">
+
+    <!-- Sidebar -->
+    <div class="w-1/4 bg-green-50 border-r">
+      <div class="p-6 text-center font-bold text-xl text-gray-800 capitalize">
+        {{ user.last_name or '' }} {{ user.first_name or '' }}
+      </div>
+      <nav class="flex flex-col">
+        <a href="{{ url_for('profile_user', user_id=user.id) }}" class="flex items-center px-6 py-3 bg-green-100 border-l-4 border-green-500 text-green-700 font-semibold">
+          <i class="fas fa-user mr-2"></i> Profil
+        </a>
+        <a href="{{ url_for('orders') }}" class="flex items-center px-6 py-3 hover:bg-gray-50">
+          <i class="fas fa-shopping-cart mr-2 text-green-600"></i> Commandes
+        </a>
+        <a href="{{ url_for('forgot_password') }}" class="flex items-center px-6 py-3 hover:bg-gray-50">
+          <i class="fas fa-lock mr-2 text-green-600"></i> Changer mot de passe
+        </a>
+        <a href="{{ url_for('logout') }}" class="flex items-center px-6 py-3 hover:bg-gray-50 text-red-600">
+          <i class="fas fa-sign-out-alt mr-2"></i> Déconnecter
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main content -->
+    <div class="w-3/4 p-8">
+      <h2 class="text-xl font-semibold text-gray-800 border-b-2 border-green-400 pb-2 mb-6">Informations du compte</h2>
+
+      <form method="POST" action="{{ url_for('profile') }}">
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">Adresse e-mail</label>
+            <input type="email" name="email" value="{{ user.email or '' }}" class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:outline-none" readonly>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">Téléphone</label>
+            <input type="text" name="phone" value="{{ user.phone or '' }}" class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:outline-none" readonly>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">Nom</label>
+            <input type="text" name="last_name" value="{{ user.last_name or '' }}" class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:outline-none" readonly>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">Prénom</label>
+            <input type="text" name="first_name" value="{{ user.first_name or '' }}" class="w-full border rounded-md px-3 py-2 bg-gray-50 focus:outline-none" readonly>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}DZ University{% endblock %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto mt-20 grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+  
+  <!-- Section connexion -->
+  <div class="bg-white border rounded-lg shadow-md p-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">SE CONNECTER</h2>
+    <p class="text-gray-600 mb-6">Si vous avez un compte chez nous, veuillez vous connecter.</p>
+
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="block mb-2 font-semibold text-gray-700">Nom d'utilisateur *</label>
+      <input name="username" type="text" placeholder="Nom d'utilisateur" required
+             class="w-full p-2.5 border border-gray-300 rounded-md mb-4 focus:ring-2 focus:ring-green-400 focus:outline-none">
+
+      <label class="block mb-2 font-semibold text-gray-700">Mot de passe *</label>
+      <input name="password" type="password" placeholder="Mot de passe" required
+             class="w-full p-2.5 border border-gray-300 rounded-md mb-4 focus:ring-2 focus:ring-green-400 focus:outline-none">
+
+      <a href="{{ url_for('forgot_password') }}" class="text-green-500 text-sm hover:underline">
+        <i class="fa fa-lock mr-1"></i>Mot de passe oublié
+      </a>
+
+      <button type="submit" class="w-full mt-4 bg-green-500 text-white font-semibold py-2.5 rounded-md hover:bg-green-600 transition">
+        Se Connecter
+      </button>
+    </form>
+  </div>
+
+  <!-- Section inscription -->
+  <div class="bg-white border rounded-lg shadow-md p-8 flex flex-col justify-center">
+    <h2 class="text-2xl font-bold text-gray-800 mb-3">NOUVEAU Utilisateur</h2>
+    <p class="text-gray-600 mb-6">
+      En créant un compte chez nous, consultez et suivez vos formations dans votre compte et bien plus encore.
+    </p>
+    <a href="{{ url_for('register') }}" 
+       class="bg-green-500 text-white font-semibold px-6 py-2 rounded-md text-center hover:bg-green-600 transition">
+      CRÉER UN COMPTE
+    </a>
+  </div>
+
+</div>
+
+{% endblock %}

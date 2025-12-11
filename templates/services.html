@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Nos Services{% endblock %}
+
+{% block content %}
+<!-- Hero section -->
+<section class="relative bg-gray-100">
+  <div class="relative h-56 md:h-64 w-full overflow-hidden">
+    <img src="{{ url_for('static', filename='images/services-banner.jpg') }}" 
+         alt="Nos Services" 
+         class="w-full h-full object-cover opacity-60">
+    <div class="absolute inset-0 flex flex-col justify-center items-center text-white">
+      <h1 class="text-3xl md:text-4xl font-bold mb-2">Nos Services</h1>
+      <nav class="text-sm bg-green-500 px-3 py-1 rounded">
+        <a href="{{ url_for('index') }}" class="hover:underline">Accueil</a> 
+        <span class="mx-1">›</span> 
+        <span>Nos Services</span>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- Services List -->
+<section class="max-w-5xl mx-auto py-16 px-6">
+  <div class="space-y-10">
+
+    <!-- Service 1 -->
+    <div class="flex items-start space-x-4 group cursor-pointer">
+      <div class="flex-shrink-0 bg-green-100 text-green-600 p-4 rounded-xl transition-all duration-500 transform 
+                  group-hover:scale-110 group-hover:rotate-12 group-hover:bg-green-500 group-hover:text-white shadow-sm group-hover:shadow-xl">
+        <i class="fas fa-laptop text-2xl"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-800 transition-colors duration-300 group-hover:text-green-600">
+          Formations en Ligne
+        </h3>
+        <p class="text-gray-600 mt-1">
+          Nous offrons des cours en ligne dispensés par des experts en biologie, couvrant une gamme étendue de sujets tels que la génétique,
+          l’écologie, la cytologie et la microbiologie, entre autres.
+        </p>
+      </div>
+    </div>
+
+    <!-- Service 2 -->
+    <div class="flex items-start space-x-4 group cursor-pointer">
+      <div class="flex-shrink-0 bg-green-100 text-green-600 p-4 rounded-xl transition-all duration-500 transform 
+                  group-hover:scale-110 group-hover:-rotate-12 group-hover:bg-green-500 group-hover:text-white shadow-sm group-hover:shadow-xl">
+        <i class="fas fa-video text-2xl"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-800 transition-colors duration-300 group-hover:text-green-600">
+          Vidéos Enregistrées
+        </h3>
+        <p class="text-gray-600 mt-1">
+          Profitez d’un accès à notre bibliothèque de vidéos préenregistrées. Nos vidéos sont spécialement conçues pour simplifier les concepts
+          complexes et rendre l’apprentissage plus accessible.
+        </p>
+      </div>
+    </div>
+
+    <!-- Service 3 -->
+    <div class="flex items-start space-x-4 group cursor-pointer">
+      <div class="flex-shrink-0 bg-green-100 text-green-600 p-4 rounded-xl transition-all duration-500 transform 
+                  group-hover:scale-110 group-hover:rotate-12 group-hover:bg-green-500 group-hover:text-white shadow-sm group-hover:shadow-xl">
+        <i class="fas fa-folder-open text-2xl"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-800 transition-colors duration-300 group-hover:text-green-600">
+          Documents et Ressources
+        </h3>
+        <p class="text-gray-600 mt-1">
+          Bénéficiez d’un accès à notre collection de livres blancs et de documents de référence, ainsi que de guides pour la recherche
+          scientifique et de supports de formation pour enrichir vos connaissances.
+        </p>
+      </div>
+    </div>
+
+    <!-- Service 4 -->
+    <div class="flex items-start space-x-4 group cursor-pointer">
+      <div class="flex-shrink-0 bg-green-100 text-green-600 p-4 rounded-xl transition-all duration-500 transform 
+                  group-hover:scale-110 group-hover:-rotate-12 group-hover:bg-green-500 group-hover:text-white shadow-sm group-hover:shadow-xl">
+        <i class="fas fa-chalkboard-teacher text-2xl"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-800 transition-colors duration-300 group-hover:text-green-600">
+          Cours Particuliers
+        </h3>
+        <p class="text-gray-600 mt-1">
+          Explorez nos cours particuliers sur mesure ! Avec des enseignants qualifiés et un soutien individualisé, atteignez vos objectifs
+          académiques. Rejoignez-nous pour un apprentissage efficace et personnalisé.
+        </p>
+      </div>
+    </div>
+
+    <!-- Service 5 -->
+    <div class="flex items-start space-x-4 group cursor-pointer">
+      <div class="flex-shrink-0 bg-green-100 text-green-600 p-4 rounded-xl transition-all duration-500 transform 
+                  group-hover:scale-110 group-hover:rotate-12 group-hover:bg-green-500 group-hover:text-white shadow-sm group-hover:shadow-xl">
+        <i class="fas fa-briefcase text-2xl"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-800 transition-colors duration-300 group-hover:text-green-600">
+          Formation Professionnelle
+        </h3>
+        <p class="text-gray-600 mt-1">
+          Les formations en ligne en biologie offrent une manière flexible et interactive d’apprendre divers sujets biologiques. Les cours
+          utilisent des méthodes virtuelles telles que des vidéos et des travaux pratiques. À la fin, les étudiants peuvent obtenir une
+          certification.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

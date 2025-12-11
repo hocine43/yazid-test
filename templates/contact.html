@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}DZ University{% endblock %}
+{% block content %}
+
+<!-- ================= HERO SECTION ================= -->
+<section class="relative bg-green-800 text-white py-20 text-center">
+  <div class="absolute inset-0 opacity-70 bg-[url('{{ url_for('static', filename='images/bg-books.jpg') }}')] bg-cover bg-center"></div>
+  <div class="relative z-10">
+    <h1 class="text-4xl font-bold mb-2">Contact</h1>
+    <div class="flex justify-center items-center space-x-2 text-sm">
+      <a href="{{ url_for('index') }}" class="hover:underline text-green-200">Accueil</a>
+      <span>›</span>
+      <span class="text-green-100">Contact</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MAP SECTION ================= -->
+<section class="relative">
+  <iframe 
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3192.4317040661057!2d3.058756!3d36.775360!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12f2cce3fdf4e5ad%3A0x7c6eeb67b3c6e5c!2sAlger%20Centre!5e0!3m2!1sfr!2sdz!4v1739955500000!5m2!1sfr!2sdz"
+    width="100%"
+    height="400"
+    style="border:0;"
+    allowfullscreen=""
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade">
+  </iframe>
+</section>
+
+<!-- ================= CONTACT SECTION ================= -->
+<section class="py-20 bg-gray-50">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 px-6">
+
+    <!-- Left: Informations -->
+    <div class="relative bg-green-900 text-white rounded-lg shadow-xl p-10 flex flex-col justify-center">
+      <div class="absolute inset-0 opacity-20 bg-[url('{{ url_for('static', filename='images/library.jpg') }}')] bg-cover bg-center rounded-lg"></div>
+      <div class="relative z-10">
+        <h3 class="text-2xl font-semibold mb-6 flex items-center space-x-3">
+          <i class="fas fa-address-book text-green-400"></i>
+          <span>Nos Coordonnées</span>
+        </h3>
+
+        <div class="space-y-6">
+          <div class="flex items-start space-x-4">
+            <div class="bg-green-600 p-3 rounded-full"><i class="fas fa-phone text-white"></i></div>
+            <div>
+              <h4 class="font-semibold text-green-300">Téléphone</h4>
+              <p>0799125417</p>
+              <p></p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4">
+            <div class="bg-green-600 p-3 rounded-full"><i class="fas fa-envelope text-white"></i></div>
+            <div>
+              <h4 class="font-semibold text-green-300">E-mail</h4>
+              <p>yaziduniversity@gmail.com</p>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-4">
+            <div class="bg-green-600 p-3 rounded-full"><i class="fas fa-map-marker-alt text-white"></i></div>
+            <div>
+              <h4 class="font-semibold text-green-300">Adresse</h4>
+              <p>Alger</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Formulaire -->
+    <div class="bg-white shadow-xl rounded-lg p-8 border border-gray-100">
+      <h3 class="text-xl font-semibold text-green-700 mb-6 flex items-center space-x-2">
+        <i class="fas fa-paper-plane text-green-600"></i>
+        <span>Contactez-nous</span>
+      </h3>
+      <form method="POST" action="{{ url_for('contact') }}" class="space-y-4" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <input type="text" name="name" placeholder="Nom complet" required 
+               pattern=".{3,}" title="Le nom doit contenir au moins 3 caractères"
+               class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
+        
+        <input type="email" name="email" placeholder="E-mail" required
+               title="Veuillez entrer une adresse e-mail valide"
+               class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
+        
+        <input type="tel" name="phone" placeholder="Téléphone (05xxxxxxxx)" required 
+               pattern="^(05|06|07)\d{8}$" 
+               title="Entrez un numéro de téléphone algérien valide (commençant par 05, 06 ou 07)"
+               class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
+
+        <textarea name="message" placeholder="Votre message..." rows="4" required minlength="10"
+                  title="Le message doit contenir au moins 10 caractères"
+                  class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"></textarea>
+
+        <button type="submit" class="w-full bg-green-500 text-white font-semibold py-2 rounded-md hover:bg-green-600 transition">
+          <i class="fas fa-paper-plane mr-2"></i>Envoyer
+        </button>
+      </form>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="mt-6">
+        {% for category, msg in messages %}
+        <p class="p-3 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+          {{ msg }}
+        </p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}
