@@ -5,8 +5,8 @@
 <div class="max-w-6xl mx-auto px-6 py-10">
   <h2 class="text-3xl font-semibold mb-6 text-green-700">Mes Formations</h2>
 
-  {# 🔐 الحساب مازال ما تفعلش #}
   {% if not activated %}
+    {# 🔒 الحساب غير مفعّل #}
     <div class="bg-yellow-50 border border-yellow-400 rounded-lg shadow-md p-8 text-center max-w-lg mx-auto">
       <h2 class="text-2xl font-bold text-yellow-700 mb-2">
         Votre compte n'est pas encore activé
@@ -16,17 +16,13 @@
       </p>
 
       <form method="post" action="{{ url_for('activate') }}" class="space-y-4">
-        <input
-          type="text"
-          name="code"
-          required
-          placeholder="Entrez votre code d'activation"
-          class="w-full px-4 py-2 border border-yellow-300 rounded-md focus:ring-2 focus:ring-yellow-400 focus:outline-none text-center text-lg"
-        >
-        <button
-          type="submit"
-          class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md shadow transition"
-        >
+        <input type="text"
+               name="code"
+               required
+               placeholder="Entrez votre code d'activation"
+               class="w-full px-4 py-2 border border-yellow-300 rounded-md focus:ring-2 focus:ring-yellow-400 focus:outline-none text-center text-lg">
+        <button type="submit"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md shadow transition">
           🔓 Activer mon compte
         </button>
       </form>
@@ -38,189 +34,191 @@
     </div>
 
   {% else %}
-    {# ✅ الحساب مفعَّل #}
 
     {% if formations_univ or formations_bac %}
 
-      {# ================== 🎓 FORMATIONS UNIVERSITAIRES ================== #}
+      {# ====================== 🎓 Formations Universitaires ====================== #}
       {% if formations_univ %}
         <h3 class="text-2xl font-semibold text-green-700 mb-4">Formations Universitaires</h3>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           {% for f in formations_univ %}
-          <div class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
-            <img src="{{ url_for('static', filename=f.image) }}"
-                 alt="{{ f.titre|e }}"
-                 class="w-full h-40 object-cover">
-            <div class="p-4">
-              <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ f.titre|e }}</h3>
-              <p class="text-gray-600 text-sm mb-4">
-                {{ ((f.description or '')[:100])|e }}...
-              </p>
-              <button type="button"
-                      class="inline-flex items-center bg-green-50 text-green-700 hover:bg-green-100 px-3 py-2 rounded border border-green-200 text-sm font-medium transition"
-                      data-open="#modal-f{{ f.id }}">
-                🎬 Voir les vidéos
-              </button>
-            </div>
-          </div>
-
-          {# 🔽 Modal vidéos de cette formation #}
-          <div id="modal-f{{ f.id }}" class="modal fixed inset-0 hidden z-50">
-            <div class="modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-
-            <div class="relative z-10 max-w-[90%] mx-auto my-10 bg-white rounded-3xl shadow-2xl overflow-hidden border border-green-100">
-              <div class="flex items-center justify-between px-8 py-5 border-b bg-gradient-to-r from-green-50 to-green-100">
-                <div class="flex items-center gap-3">
-                  <span class="text-3xl">🎓</span>
-                  <h3 class="text-2xl font-semibold text-green-800">
-                    Vidéos — {{ f.titre|e }}
-                  </h3>
-                </div>
+            <div class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+              <img src="{{ url_for('static', filename=f.image) }}"
+                   alt="{{ f.titre|e }}"
+                   class="w-full h-40 object-cover">
+              <div class="p-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ f.titre|e }}</h3>
+                <p class="text-gray-600 text-sm mb-4">
+                  {{ ((f.description or '')[:100])|e }}...
+                </p>
                 <button type="button"
-                        class="modal-close text-gray-500 hover:text-gray-800 text-4xl leading-none px-3">
-                  &times;
-                </button>
-              </div>
-
-              <div class="p-6 max-h-[80vh] overflow-y-auto bg-gray-50">
-                {% set has_videos = False %}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {% for v in videos %}
-                    {% if v.formation_id == f.id %}
-                      {% set has_videos = True %}
-                      <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-gray-200">
-                        <div class="px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 border-b">
-                          <p class="font-medium text-gray-800 text-sm truncate group-hover:text-green-700 transition">
-                            🎬 {{ v.title|e }}
-                          </p>
-                          <p class="text-gray-600 text-xs mt-1 italic">
-                            {{ (v.description or "— Pas de description —")|e }}
-                          </p>
-                        </div>
-
-                        <div class="relative bg-black flex justify-center items-center">
-                          <video
-                            class="hls-player protected-video max-h-[80vh] w-auto object-contain rounded-b-xl hover:scale-[1.02] transition-transform duration-300"
-                            controls
-                            playsinline
-                            preload="metadata"
-                            controlsList="nodownload noplaybackrate"
-                            disablePictureInPicture
-                            muted
-                            data-hls-url="{{ url_for('play_video', vid=v.id) }}">
-                          </video>
-                        </div>
-                      </div>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-
-                {% if not has_videos %}
-                  <p class="text-center text-gray-500 italic mt-6">
-                    Aucune vidéo disponible pour cette formation.
-                  </p>
-                {% endif %}
-              </div>
-
-              <div class="px-8 py-4 border-t bg-gradient-to-r from-green-50 to-green-100 flex justify-end">
-                <button type="button"
-                        class="modal-close bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition">
-                  Fermer
+                        class="inline-flex items-center bg-green-50 text-green-700 hover:bg-green-100 px-3 py-2 rounded border border-green-200 text-sm font-medium transition"
+                        data-open="#modal-f{{ f.id }}">
+                  🎬 Voir les vidéos
                 </button>
               </div>
             </div>
-          </div>
+
+            {# ===== Modal vidéos pour cette formation universitaire ===== #}
+            <div id="modal-f{{ f.id }}" class="modal fixed inset-0 hidden z-50">
+              <div class="modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+
+              <div class="relative z-10 max-w-[90%] mx-auto my-10 bg-white rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all border border-green-100">
+                <div class="flex items-center justify-between px-8 py-5 border-b bg-gradient-to-r from-green-50 to-green-100">
+                  <div class="flex items-center gap-3">
+                    <span class="text-3xl">🎓</span>
+                    <h3 class="text-2xl font-semibold text-green-800">
+                      Vidéos — {{ f.titre|e }}
+                    </h3>
+                  </div>
+                  <button type="button"
+                          class="modal-close text-gray-500 hover:text-gray-800 text-4xl leading-none px-3">
+                    &times;
+                  </button>
+                </div>
+
+                <div class="p-6 max-h-[80vh] overflow-y-auto bg-gray-50">
+                  {% set has_videos = false %}
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% for v in videos %}
+                      {% if v.formation_id == f.id %}
+                        {% set has_videos = true %}
+                        <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-gray-200">
+                          <div class="px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 border-b">
+                            <p class="font-medium text-gray-800 text-sm truncate group-hover:text-green-700 transition">
+                              🎬 {{ v.title|e }}
+                            </p>
+                            <p class="text-gray-600 text-xs mt-1 italic">
+                              {{ (v.description or "— Pas de description —")|e }}
+                            </p>
+                          </div>
+
+                          <div class="relative bg-black flex justify-center items-center">
+                            <video
+                              class="hls-player max-h-[80vh] w-auto object-contain rounded-b-xl hover:scale-[1.02] transition-transform duration-300"
+                              controls
+                              playsinline
+                              preload="metadata"
+                              controlsList="nodownload noplaybackrate"
+                              disablePictureInPicture
+                              muted
+                              data-url="{{ url_for('play_video', vid=v.id) }}">
+                            </video>
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+
+                  {% if not has_videos %}
+                    <p class="text-center text-gray-500 italic mt-6">
+                      Aucune vidéo disponible pour cette formation.
+                    </p>
+                  {% endif %}
+                </div>
+
+                <div class="px-8 py-4 border-t bg-gradient-to-r from-green-50 to-green-100 flex justify-end">
+                  <button type="button"
+                          class="modal-close bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition">
+                    Fermer
+                  </button>
+                </div>
+              </div>
+            </div>
+
           {% endfor %}
         </div>
       {% endif %}
 
-      {# ================== 🎯 FORMATIONS BAC ================== #}
+      {# ====================== 🎯 Formations BAC ====================== #}
       {% if formations_bac %}
         <h3 class="text-2xl font-semibold text-blue-700 mb-4">Formations BAC</h3>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {% for f in formations_bac %}
-          <div class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
-            <img src="{{ url_for('static', filename=f.image) }}"
-                 alt="{{ f.titre|e }}"
-                 class="w-full h-40 object-cover">
-            <div class="p-4">
-              <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ f.titre|e }}</h3>
-              <p class="text-gray-600 text-sm mb-4">
-                {{ ((f.description or '')[:100])|e }}...
-              </p>
-              <button type="button"
-                      class="inline-flex items-center bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-2 rounded border border-blue-200 text-sm font-medium transition"
-                      data-open="#modal-f{{ f.id }}">
-                🎬 Voir les vidéos
-              </button>
-            </div>
-          </div>
-
-          {# 🔽 Modal vidéos BAC #}
-          <div id="modal-f{{ f.id }}" class="modal fixed inset-0 hidden z-50">
-            <div class="modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-
-            <div class="relative z-10 max-w-[90%] mx-auto my-10 bg-white rounded-3xl shadow-2xl overflow-hidden border border-blue-100">
-              <div class="flex items-center justify-between px-8 py-5 border-b bg-gradient-to-r from-blue-50 to-blue-100">
-                <div class="flex items-center gap-3">
-                  <span class="text-3xl">🎯</span>
-                  <h3 class="text-2xl font-semibold text-blue-800">
-                    Vidéos — {{ f.titre|e }}
-                  </h3>
-                </div>
+            <div class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+              <img src="{{ url_for('static', filename=f.image) }}"
+                   alt="{{ f.titre|e }}"
+                   class="w-full h-40 object-cover">
+              <div class="p-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ f.titre|e }}</h3>
+                <p class="text-gray-600 text-sm mb-4">
+                  {{ ((f.description or '')[:100])|e }}...
+                </p>
                 <button type="button"
-                        class="modal-close text-gray-500 hover:text-gray-800 text-4xl leading-none px-3">
-                  &times;
-                </button>
-              </div>
-
-              <div class="p-6 max-h-[80vh] overflow-y-auto bg-gray-50">
-                {% set has_videos = False %}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {% for v in videos %}
-                    {% if v.formation_id == f.id %}
-                      {% set has_videos = True %}
-                      <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-gray-200">
-                        <div class="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
-                          <p class="font-medium text-gray-800 text-sm truncate group-hover:text-blue-700 transition">
-                            🎬 {{ v.title|e }}
-                          </p>
-                          <p class="text-gray-600 text-xs mt-1 italic">
-                            {{ (v.description or "— Pas de description —")|e }}
-                          </p>
-                        </div>
-                        <div class="relative bg-black flex justify-center items-center">
-                          <video
-                            class="hls-player protected-video max-h-[80vh] w-auto object-contain rounded-b-xl hover:scale-[1.02] transition-transform duration-300"
-                            controls
-                            playsinline
-                            preload="metadata"
-                            controlsList="nodownload noplaybackrate"
-                            disablePictureInPicture
-                            muted
-                            data-hls-url="{{ url_for('play_video', vid=v.id) }}">
-                          </video>
-                        </div>
-                      </div>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-
-                {% if not has_videos %}
-                  <p class="text-center text-gray-500 italic mt-6">
-                    Aucune vidéo disponible pour cette formation.
-                  </p>
-                {% endif %}
-              </div>
-
-              <div class="px-8 py-4 border-t bg-gradient-to-r from-blue-50 to-blue-100 flex justify-end">
-                <button type="button"
-                        class="modal-close bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition">
-                  Fermer
+                        class="inline-flex items-center bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-2 rounded border border-blue-200 text-sm font-medium transition"
+                        data-open="#modal-f{{ f.id }}">
+                  🎬 Voir les vidéos
                 </button>
               </div>
             </div>
-          </div>
+
+            {# ===== Modal vidéos pour cette formation BAC ===== #}
+            <div id="modal-f{{ f.id }}" class="modal fixed inset-0 hidden z-50">
+              <div class="modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+
+              <div class="relative z-10 max-w-[90%] mx-auto my-10 bg-white rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all border border-blue-100">
+                <div class="flex items-center justify-between px-8 py-5 border-b bg-gradient-to-r from-blue-50 to-blue-100">
+                  <div class="flex items-center gap-3">
+                    <span class="text-3xl">🎯</span>
+                    <h3 class="text-2xl font-semibold text-blue-800">
+                      Vidéos — {{ f.titre|e }}
+                    </h3>
+                  </div>
+                  <button type="button"
+                          class="modal-close text-gray-500 hover:text-gray-800 text-4xl leading-none px-3">
+                    &times;
+                  </button>
+                </div>
+
+                <div class="p-6 max-h-[80vh] overflow-y-auto bg-gray-50">
+                  {% set has_videos = false %}
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% for v in videos %}
+                      {% if v.formation_id == f.id %}
+                        {% set has_videos = true %}
+                        <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-gray-200">
+                          <div class="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
+                            <p class="font-medium text-gray-800 text-sm truncate group-hover:text-blue-700 transition">
+                              🎬 {{ v.title|e }}
+                            </p>
+                            <p class="text-gray-600 text-xs mt-1 italic">
+                              {{ (v.description or "— Pas de description —")|e }}
+                            </p>
+                          </div>
+
+                          <div class="relative bg-black flex justify-center items-center">
+                            <video
+                              class="hls-player max-h-[80vh] w-auto object-contain rounded-b-xl hover:scale-[1.02] transition-transform duration-300"
+                              controls
+                              playsinline
+                              preload="metadata"
+                              controlsList="nodownload noplaybackrate"
+                              disablePictureInPicture
+                              muted
+                              data-url="{{ url_for('play_video', vid=v.id) }}">
+                            </video>
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+
+                  {% if not has_videos %}
+                    <p class="text-center text-gray-500 italic mt-6">
+                      Aucune vidéo disponible pour cette formation.
+                    </p>
+                  {% endif %}
+                </div>
+
+                <div class="px-8 py-4 border-t bg-gradient-to-r from-blue-50 to-blue-100 flex justify-end">
+                  <button type="button"
+                          class="modal-close bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-md transition">
+                    Fermer
+                  </button>
+                </div>
+              </div>
+            </div>
+
           {% endfor %}
         </div>
       {% endif %}
@@ -233,64 +231,54 @@
   {% endif %}
 </div>
 
-{# =============== CSS خفيفة لحماية الفيديو =============== #}
-<style>
-  .protected-video {
-    -webkit-user-select: none;
-    user-select: none;
-  }
-  .protected-video::-webkit-media-controls-enclosure {
-    overflow: hidden;
-  }
-</style>
-
-{# hls.js #}
+{# ================= HLS + JS des modals ================= #}
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-  // فتح/غلق المودالات
-  document.querySelectorAll('[data-open]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const target = btn.getAttribute('data-open');
-      const modal = document.querySelector(target);
-      if (modal) {
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-      }
-    });
-  });
+  // 🎬 تهيئة كل فيديوهات HLS مرة واحدة
+  document.addEventListener("DOMContentLoaded", () => {
+    const players = document.querySelectorAll(".hls-player");
 
-  document.querySelectorAll('.modal').forEach(modal => {
-    modal.addEventListener('click', e => {
-      if (e.target.classList.contains('modal-backdrop') ||
-          e.target.classList.contains('modal-close')) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-        modal.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (_) {} });
-      }
-    });
-  });
-
-  // تحميل HLS لكل فيديو مرة وحدة
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.hls-player').forEach(video => {
-      const requestUrl = video.dataset.hlsUrl;
+    players.forEach(video => {
+      const requestUrl = video.dataset.url;
       if (!requestUrl) return;
 
       fetch(requestUrl)
         .then(res => res.json())
         .then(data => {
           if (!data.playlist_url) return;
+
           if (window.Hls && Hls.isSupported()) {
             const hls = new Hls();
             hls.loadSource(data.playlist_url);
             hls.attachMedia(video);
-          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
             video.src = data.playlist_url;
           }
+
           video.volume = 0.5;
         })
         .catch(err => console.error("Erreur fetch HLS:", err));
+    });
+
+    // 🎛️ فتح وغلق المودالات
+    document.querySelectorAll("[data-open]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const modal = document.querySelector(btn.getAttribute("data-open"));
+        if (modal) modal.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      });
+    });
+
+    document.querySelectorAll(".modal").forEach(modal => {
+      modal.addEventListener("click", e => {
+        if (e.target.classList.contains("modal-backdrop") ||
+            e.target.classList.contains("modal-close")) {
+          modal.classList.add("hidden");
+          document.body.style.overflow = "";
+          modal.querySelectorAll("video").forEach(v => { try { v.pause(); } catch(e) {} });
+        }
+      });
     });
   });
 </script>
