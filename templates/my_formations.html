@@ -5,8 +5,8 @@
 <div class="max-w-6xl mx-auto px-6 py-10">
   <h2 class="text-3xl font-semibold mb-6 text-green-700">Mes Formations</h2>
 
+  {# 🔒 الحساب غير مفعّل #}
   {% if not activated %}
-    {# 🔒 الحساب غير مفعّل #}
     <div class="bg-yellow-50 border border-yellow-400 rounded-lg shadow-md p-8 text-center max-w-lg mx-auto">
       <h2 class="text-2xl font-bold text-yellow-700 mb-2">
         Votre compte n'est pas encore activé
@@ -37,7 +37,7 @@
 
     {% if formations_univ or formations_bac %}
 
-      {# ====================== 🎓 Formations Universitaires ====================== #}
+      {# ====================== 🎓 FORMATIONS UNIVERSITAIRES ====================== #}
       {% if formations_univ %}
         <h3 class="text-2xl font-semibold text-green-700 mb-4">Formations Universitaires</h3>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -59,7 +59,7 @@
               </div>
             </div>
 
-            {# ===== Modal vidéos pour cette formation universitaire ===== #}
+            {# ===== Modal vidéos لهذه الفورماسيون ===== #}
             <div id="modal-f{{ f.id }}" class="modal fixed inset-0 hidden z-50">
               <div class="modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
 
@@ -78,11 +78,9 @@
                 </div>
 
                 <div class="p-6 max-h-[80vh] overflow-y-auto bg-gray-50">
-                  {% set has_videos = false %}
                   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {% for v in videos %}
                       {% if v.formation_id == f.id %}
-                        {% set has_videos = true %}
                         <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-gray-200">
                           <div class="px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 border-b">
                             <p class="font-medium text-gray-800 text-sm truncate group-hover:text-green-700 transition">
@@ -109,12 +107,6 @@
                       {% endif %}
                     {% endfor %}
                   </div>
-
-                  {% if not has_videos %}
-                    <p class="text-center text-gray-500 italic mt-6">
-                      Aucune vidéo disponible pour cette formation.
-                    </p>
-                  {% endif %}
                 </div>
 
                 <div class="px-8 py-4 border-t bg-gradient-to-r from-green-50 to-green-100 flex justify-end">
@@ -130,7 +122,7 @@
         </div>
       {% endif %}
 
-      {# ====================== 🎯 Formations BAC ====================== #}
+      {# ====================== 🎯 FORMATIONS BAC ====================== #}
       {% if formations_bac %}
         <h3 class="text-2xl font-semibold text-blue-700 mb-4">Formations BAC</h3>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -152,7 +144,7 @@
               </div>
             </div>
 
-            {# ===== Modal vidéos pour cette formation BAC ===== #}
+            {# ===== Modal vidéos BAC ===== #}
             <div id="modal-f{{ f.id }}" class="modal fixed inset-0 hidden z-50">
               <div class="modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
 
@@ -171,11 +163,9 @@
                 </div>
 
                 <div class="p-6 max-h-[80vh] overflow-y-auto bg-gray-50">
-                  {% set has_videos = false %}
                   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {% for v in videos %}
                       {% if v.formation_id == f.id %}
-                        {% set has_videos = true %}
                         <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-gray-200">
                           <div class="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
                             <p class="font-medium text-gray-800 text-sm truncate group-hover:text-blue-700 transition">
@@ -202,12 +192,6 @@
                       {% endif %}
                     {% endfor %}
                   </div>
-
-                  {% if not has_videos %}
-                    <p class="text-center text-gray-500 italic mt-6">
-                      Aucune vidéo disponible pour cette formation.
-                    </p>
-                  {% endif %}
                 </div>
 
                 <div class="px-8 py-4 border-t bg-gradient-to-r from-blue-50 to-blue-100 flex justify-end">
@@ -231,15 +215,13 @@
   {% endif %}
 </div>
 
-{# ================= HLS + JS des modals ================= #}
+{# ================= HLS + JS DES MODALS ================= #}
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-  // 🎬 تهيئة كل فيديوهات HLS مرة واحدة
   document.addEventListener("DOMContentLoaded", () => {
-    const players = document.querySelectorAll(".hls-player");
-
-    players.forEach(video => {
+    // 🎬 تهيئة كل فيديوهات HLS
+    document.querySelectorAll(".hls-player").forEach(video => {
       const requestUrl = video.dataset.url;
       if (!requestUrl) return;
 
